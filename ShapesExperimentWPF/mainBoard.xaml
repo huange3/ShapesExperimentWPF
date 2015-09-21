@@ -1,0 +1,18 @@
+﻿<Window x:Class="ShapesExperimentWPF.mainBoard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ShapesExperimentWPF"
+        mc:Ignorable="d"
+        Title="Experiment Board" Height="500" Width="500" Icon="shape_move_backwards.ico"
+        WindowStyle="None" ResizeMode="NoResize"  
+    WindowStartupLocation="CenterScreen" WindowState="Maximized" KeyDown="Window_KeyDown" Closing="Window_Closing">
+    <Canvas x:Name="mainCanvas" Margin="0" MouseLeftButtonDown="mainCanvas_MouseLeftButtonDown" MouseLeftButtonUp="mainCanvas_MouseLeftButtonUp" MouseMove="mainCanvas_MouseMove">
+        <Label x:Name="label" Content="Success:" Canvas.Left="10" Canvas.Top="10"/>
+        <Label x:Name="label1" Content="Miss:" Canvas.Left="10" Canvas.Top="36"/>
+        <Label x:Name="successCountLB" Content="0" Canvas.Left="68" Canvas.Top="10"/>
+        <Label x:Name="missCountLB" Content="0" Canvas.Left="51" Canvas.Top="36"/>
+        <Label x:Name="moneyLB" Content="$0.00" Canvas.Left="215" Canvas.Top="10" FontFamily="Segoe WP Black" FontSize="30"/>
+    </Canvas>
+</Window>
