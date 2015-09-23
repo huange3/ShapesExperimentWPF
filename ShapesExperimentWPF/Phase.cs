@@ -24,7 +24,12 @@ namespace ShapesExperimentWPF
             this.Observations = m;
             this.Density = w;
             this.RankType = rank;
-            this.ResponseIndex = (int)Math.Floor((m + 1) * (1 - w));
+
+            if (w > 0)
+            {
+                this.ResponseIndex = (int)Math.Floor((m + 1) * (1 - w));
+            }
+            
             this.Trials = new List<Trial>();
         }
     }

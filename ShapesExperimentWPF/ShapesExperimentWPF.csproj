@@ -121,30 +121,26 @@
     <Resource Include="shape_move_backwards.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Images\blue-01.png" />
     <Resource Include="Images\blue-02.png" />
     <Resource Include="Images\blue-03.png" />
     <Resource Include="Images\blue-04.png" />
     <Resource Include="Images\blue-05.png" />
-    <Resource Include="Images\blue-06.png" />
-    <Resource Include="Images\gray-01.png" />
-    <Resource Include="Images\gray-02.png" />
-    <Resource Include="Images\gray-03.png" />
-    <Resource Include="Images\gray-04.png" />
-    <Resource Include="Images\gray-05.png" />
-    <Resource Include="Images\gray-06.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\bucket-01.png" />
     <Resource Include="Images\bucket-02.png" />
     <Resource Include="Images\bucket-03.png" />
     <Resource Include="Images\bucket-04.png" />
     <Resource Include="Images\bucket-05.png" />
-    <Resource Include="Images\bucket-06.png" />
     <Resource Include="Images\bucket-empty.png" />
+    <Resource Include="Images\gray-01.png" />
+    <Resource Include="Images\gray-02.png" />
+    <Resource Include="Images\gray-03.png" />
+    <Resource Include="Images\gray-04.png" />
+    <Resource Include="Images\gray-05.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

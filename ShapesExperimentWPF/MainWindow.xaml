@@ -77,6 +77,7 @@
                 <Label x:Name="label1_Copy" Content="Participant ID" HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="125" Margin="0,43,260,19" Grid.RowSpan="2"/>
                 <TextBox x:Name="participantIDTB" HorizontalAlignment="Left" Height="22" Margin="240,0,0,0" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
                 <Button x:Name="startBtn" Content="Start" Margin="196,0,0,10" Grid.Row="2" Height="32" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Width="100" Click="startBtn_Click"/>
+                <Button x:Name="generateIDBtn" Content="Generate ID" HorizontalAlignment="Left" Margin="374,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="generateIDBtn_Click"/>
             </Grid>
         </Grid>
     </GroupBox>

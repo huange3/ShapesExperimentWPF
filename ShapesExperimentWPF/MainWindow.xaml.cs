@@ -26,6 +26,7 @@ namespace ShapesExperimentWPF
         public int TrialRestDuration = 0;
         public decimal MoneyValue;
         public decimal RewardValue;
+        public string ParticipantID = "";
 
         public MainWindow()
         {
@@ -72,6 +73,7 @@ namespace ShapesExperimentWPF
                           .ToArray());
 
             participantIDTB.Text = result;
+            ParticipantID = result;
         }
 
         private Boolean setupPhases()
@@ -148,16 +150,20 @@ namespace ShapesExperimentWPF
                 newBoard.TrialRestDuration = this.TrialRestDuration;
                 newBoard.MoneyValue = this.MoneyValue;
                 newBoard.RewardValue = this.RewardValue;
+                newBoard.ParticipantID = this.ParticipantID;
 
-                newBoard.initializeBoard();
                 newBoard.Show();
-                newBoard.runPhase();
             }
             catch (Exception e)
             {
                 MessageBox.Show("Error occurred while running experiment: " + e.Message);
                 throw e;
             }
+        }
+
+        private void generateIDBtn_Click(object sender, RoutedEventArgs e)
+        {
+            generateID();
         }
     }
 }

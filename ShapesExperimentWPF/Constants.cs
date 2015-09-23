@@ -16,6 +16,7 @@ namespace ShapesExperimentWPF
         public const char ShapeA = 'A';
         public const char ShapeB = 'B';
         public const string ImageRoot = "pack://application:,,,/Images/";
+        public const string DataRoot = "pack://application:,,,/Data/";
 
         public const int NoRank = 0;
         public const int LessThan = 1;

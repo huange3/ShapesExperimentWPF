@@ -11,7 +11,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Drawing;
 using System.Windows.Threading;
 using System.IO;
 
@@ -22,35 +21,37 @@ namespace ShapesExperimentWPF
     /// </summary>
     public partial class mainBoard : Window
     {
-        public List<Phase> Phases = null;
+        public List<Phase> Phases = new List<Phase>();
         public Queue<Phase> PhaseQueue = null;
         private Phase CurrentPhase = null;
         private Trial CurrentTrial = null;
         private List<Shape> BaselineShapes = null;
         private List<Shape> TrialShapes = null;
         private List<char> SkeletonBoard = new List<char>(64);
+        private List<Image> ImageSet = new List<Image>();
         private Shape ShapeA = null;
         private Shape ShapeB = null;
         private Shape BucketA = null;
         private Shape BucketB = null;
         private List<int> ObservationList = new List<int>();
 
+        public string ParticipantID = "";
         public int TrialDuration = 0;
         public int TrialRestDuration = 0;
         public decimal MoneyValue;
         public decimal RewardValue;
         private int CurrentTrialCount = 0;
         private int CurrentMillis = 0;
-        private bool BlinkOn = false;
+        private bool BlinkOn = true;
 
         static Random rand = new Random();
         private DispatcherTimer mainTimer = new DispatcherTimer();
         private DispatcherTimer restTimer = new DispatcherTimer();
         private DispatcherTimer rewardTimer = new DispatcherTimer();
 
-        private System.Windows.Controls.Image draggedImage;
-        private System.Windows.Point mousePosition;
-        private System.Windows.Point startMousePosition;
+        private Image draggedImage;
+        private Point mousePosition;
+        private Point startMousePosition;
 
         public mainBoard()
         {
@@ -65,6 +66,18 @@ namespace ShapesExperimentWPF
             }
         }
 
+        private void mainCanvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            initializeBoard();
+            runPhase();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // clean up after ourselves :)
+            mainCanvas.Children.RemoveRange(0, mainCanvas.Children.Count);
+        }
+
         public void initializeBoard()
         {
             try
@@ -76,7 +89,6 @@ namespace ShapesExperimentWPF
                 BaselineShapes.Add(new Shape(3, "gray-03.png"));
                 BaselineShapes.Add(new Shape(4, "gray-04.png"));
                 BaselineShapes.Add(new Shape(5, "gray-05.png"));
-                BaselineShapes.Add(new Shape(6, "gray-06.png"));
 
                 TrialShapes = new List<Shape>();
 
@@ -85,7 +97,6 @@ namespace ShapesExperimentWPF
                 TrialShapes.Add(new Shape(3, "blue-03.png"));
                 TrialShapes.Add(new Shape(4, "blue-04.png"));
                 TrialShapes.Add(new Shape(5, "blue-05.png"));
-                TrialShapes.Add(new Shape(6, "blue-06.png"));
 
                 // create ourselves a board that we can shuffle to drive 
                 // the drawBoard() function
@@ -103,9 +114,9 @@ namespace ShapesExperimentWPF
                 }
 
                 // set up our timers
-                mainTimer.Interval = new TimeSpan(TrialDuration * 1000);
-                restTimer.Interval = new TimeSpan(1000); // need 1 second intervals to show a countdown timer
-                rewardTimer.Interval = new TimeSpan(400); // get the money label to blink a few times
+                mainTimer.Interval = TimeSpan.FromSeconds(TrialDuration);
+                restTimer.Interval = TimeSpan.FromSeconds(1); // need 1 second intervals to show a countdown timer
+                rewardTimer.Interval = TimeSpan.FromMilliseconds(200); // get the money label to blink a few times
 
                 mainTimer.Tick += mainTimer_Tick;
                 rewardTimer.Tick += rewardTimer_Tick;
@@ -132,9 +143,10 @@ namespace ShapesExperimentWPF
 
                 if (PhaseQueue.Count == 0)
                 {
+                    this.Close();
                     MessageBox.Show("Experiment completed! Thank you for participating!");
                     outputData();
-                    this.Close();
+                    
                     return false;
                 }
 
@@ -165,7 +177,7 @@ namespace ShapesExperimentWPF
                 BucketA = findBucket(ShapeA.ShapeID);
                 BucketB = findBucket(ShapeB.ShapeID);
 
-                if (drawBoard()) runTrial();
+                runTrial();
 
                 return true;
             }
@@ -178,11 +190,42 @@ namespace ShapesExperimentWPF
             }
         }
 
+        private void runTrial()
+        {
+            try
+            {
+                // If we've already hit our trial limit, then kick them over to the next phase.
+                if (CurrentTrialCount == CurrentPhase.Observations)
+                {
+                    CurrentTrialCount = 0;
+                    Phases.Add(CurrentPhase);
+                    runPhase();
+                }
+                else
+                {
+                    drawBoard();
+
+                    CurrentTrial = new Trial();
+                    CurrentTrialCount++;
+
+                    successCountLB.Content = "0";
+                    missCountLB.Content = "0";
+
+                    mainTimer.Start();
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred while starting trial: " + e.Message);
+                throw e;
+            }
+        }
+
         public Boolean drawBoard()
         {
             Uri currImage = null;
             Object currTag = null;
-            System.Windows.Controls.Image newImage;
+            Image newImage;
 
             int xLoc = 0;
             int yLoc = 0;
@@ -192,6 +235,15 @@ namespace ShapesExperimentWPF
                 // suspend the layout while we're adding the new controls
                 using (var d = Dispatcher.DisableProcessing())
                 {
+                    // dispose of any controls that we already placed
+                    if (ImageSet.Count > 0)
+                    {
+                        foreach(Image i in ImageSet)
+                        {
+                            mainCanvas.Children.Remove(i);
+                        }
+                    }
+
                     // shuffle our skeleton board and then draw the controls
                     // onto the board
                     SkeletonBoard.Shuffle();
@@ -200,12 +252,12 @@ namespace ShapesExperimentWPF
                     {
                         if (i == 0)
                         {
-                            xLoc = (int)mainCanvas.ActualWidth / 2 - (65 * 4);
-                            yLoc = (int)mainCanvas.ActualHeight / 2 - (65 * 4);
+                            xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4;
+                            yLoc = (int)mainCanvas.ActualHeight / 2 - 64 * 4;
                         }
                         else if (i > 0 && i % 8 == 0)
                         {
-                            xLoc = (int)mainCanvas.ActualWidth / 2 - (65 * 4);
+                            xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4; ;
                             yLoc += 65;
                         }
                         else if (i > 0)
@@ -219,12 +271,12 @@ namespace ShapesExperimentWPF
                         {
                             case Constants.BucketA:
                                 currImage = BucketA.ImagePath;
-                                BucketA.Location = new System.Windows.Point(xLoc, yLoc);
+                                BucketA.Location = new Point(xLoc, yLoc);
                                 currTag = BucketA;
                                 break;
                             case Constants.BucketB:
                                 currImage = BucketB.ImagePath;                               
-                                BucketB.Location = new System.Windows.Point(xLoc, yLoc);
+                                BucketB.Location = new Point(xLoc, yLoc);
                                 currTag = BucketB;
                                 break;
                             case Constants.ShapeA:
@@ -240,7 +292,7 @@ namespace ShapesExperimentWPF
                         }
 
                         // create our new image control and add it to the main canvas
-                        newImage = new System.Windows.Controls.Image();
+                        newImage = new Image();
                         newImage.Source = new BitmapImage(currImage);
                         newImage.Tag = currTag;
                         newImage.Width = newImage.Source.Width;
@@ -248,11 +300,13 @@ namespace ShapesExperimentWPF
 
                         mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
                         mainCanvas.Children.Add(newImage);
+                        ImageSet.Add(newImage);
                         Canvas.SetTop(newImage, yLoc);
                         Canvas.SetLeft(newImage, xLoc);
                     }
 
-                    moneyLB.Content = this.MoneyValue.ToString("C");
+                    moneyLB.Content = this.MoneyValue.ToString("C2");
+                    Canvas.SetLeft(moneyLB, mainCanvas.ActualWidth / 2 - moneyLB.ActualWidth / 2);
                 }
                 
                 return true;
@@ -262,32 +316,6 @@ namespace ShapesExperimentWPF
                 MessageBox.Show("Error occurred while drawing board: " + e.Message);
                 this.Close();
                 return false;
-                throw e;
-            }
-        }
-
-        private void runTrial()
-        {
-            try
-            {
-                // If we've already hit our trial limit, then kick them over to the next phase.
-                if (CurrentTrialCount == CurrentPhase.Observations)
-                {
-                    runPhase();
-                    return;
-                }
-
-                CurrentTrial = new Trial();
-                CurrentTrialCount++;
-
-                successCountLB.Content = "0";
-                missCountLB.Content = "0";
-
-                mainTimer.Start();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error occurred while starting trial: " + e.Message);
                 throw e;
             }
         }
@@ -326,14 +354,81 @@ namespace ShapesExperimentWPF
 
         public void outputData()
         {
+            StringBuilder builder = new StringBuilder();
+            var filePath = "";
+            var newLine = "";
 
+            try
+            {
+                // check if our directory exists, if it doesn't then create it
+                if (!Directory.Exists("./Data"))
+                {
+                    Directory.CreateDirectory("./Data");
+                }
+
+                filePath = String.Format("{0}{1}-{2}.txt", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
+
+                foreach (Phase p in Phases)
+                {
+                    // start with our phase
+                    newLine = "Condition,Background Color,Observations,Density,Rank Type,Response Index,Trial Duration,Trial Rest Duration\n";
+                    newLine += String.Format("{0},{1},{2},{3},{4},{5},{6},{7}{8}{9}",
+                        p.Label,
+                        p.BackgroundColor.ToString(),
+                        p.Observations,
+                        p.Density,
+                        p.RankType,
+                        p.ResponseIndex,
+                        TrialDuration,
+                        TrialRestDuration,
+                        Environment.NewLine,
+                        Environment.NewLine);
+
+                    // now write the trial data
+                    newLine += "Success Count,Miss Count,Money,Response Value\n";
+
+                    foreach(Trial t in p.Trials)
+                    {
+                        newLine += String.Format("{0},{1},{2},{3}{4}",
+                            t.SuccessCount,
+                            t.MissCount,
+                            t.Money,
+                            t.ResponseValue,
+                            Environment.NewLine);
+                    }
+
+                    newLine += "\n";
+                    builder.Append(newLine);
+                }
+
+                File.WriteAllText(filePath, builder.ToString());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred while writing data to file: " + e.Message);
+                throw e;
+            }
+            finally
+            {
+                builder = null;
+            }
         }
 
         private void mainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var image = e.Source as System.Windows.Controls.Image;
-            Shape shapeInfo = (Shape)image.Tag;
+            Object temp = e.Source;
+            Type type = temp.GetType();
+            Shape shapeInfo = null;
 
+            // check if we're even clicking on a valid control
+            if (!typeof(Image).IsAssignableFrom(type)) return;
+
+            var image = e.Source as Image;
+            
+            if (image.Tag == null) return;
+
+            shapeInfo = (Shape)image.Tag;
+            
             if (shapeInfo.IsBucket) return;
 
             if (image != null && mainCanvas.CaptureMouse())
@@ -386,7 +481,7 @@ namespace ShapesExperimentWPF
             }
         }
 
-        private bool checkBucket(System.Windows.Point point, int id)
+        private bool checkBucket(Point point, int id)
         {
             try
             {
@@ -440,18 +535,16 @@ namespace ShapesExperimentWPF
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // clean up after ourselves :)
-            mainCanvas.Children.RemoveRange(0, mainCanvas.Children.Count);
-        }
-
         private void mainTimer_Tick(object sender, EventArgs e)
         {
+            // Trial ended, make sure to clear our mouse so we're picking up any pieces
+            // Do calculations, add to our trial list and continue
+            mainTimer.Stop();
+            clearMouseActions();
             calculateResponse();
             // start our reward timer so we can "flicker" the money amount
-            CurrentMillis = 2000;
-            rewardTimer.Start();
+            toggleRestCanvas(true);
+            toggleRewardTimer(true);
         }
 
         private void calculateResponse()
@@ -467,15 +560,20 @@ namespace ShapesExperimentWPF
                 // Get our response index from the current phase info
                 // Reward the user if our current success count satisfies the rank criteria
                 // either greater than or less than the response index
-                if (CurrentPhase.Label == Constants.PhaseBaseline) return;
-
-                // check if we have an observation list to compare to
-                // if not, load it from the baseline phase
-                if (ObservationList.Count == 0)
+                if (CurrentPhase.Label == Constants.PhaseBaseline)
                 {
-                    ObservationList = (from t in Phases[0].Trials
-                                       select t.SuccessCount).ToList();
+                    ObservationList.Add(CurrentTrial.SuccessCount);
+                    CurrentPhase.Trials.Add(CurrentTrial);
+                    return;
                 }
+
+                //// check if we have an observation list to compare to
+                //// if not, load it from the baseline phase
+                //if (ObservationList.Count == 0)
+                //{
+                //    ObservationList = (from t in Phases[0].Trials
+                //                       select t.SuccessCount).ToList();
+                //}
 
                 responseIndex = CurrentPhase.ResponseIndex;
 
@@ -485,7 +583,7 @@ namespace ShapesExperimentWPF
 
                 if (CurrentPhase.RankType == Constants.LessThan)
                 {
-                    if (CurrentTrial.SuccessCount < successValues[responseIndex])
+                    if (CurrentTrial.SuccessCount < successValues[responseIndex - 1])
                     {
                         MoneyValue += RewardValue;
                     }
@@ -493,7 +591,7 @@ namespace ShapesExperimentWPF
 
                 if (CurrentPhase.RankType == Constants.GreaterThan)
                 {
-                    if (CurrentTrial.SuccessCount > successValues[responseIndex])
+                    if (CurrentTrial.SuccessCount > successValues[responseIndex - 1])
                     {
                         MoneyValue += RewardValue;
                     }
@@ -501,13 +599,20 @@ namespace ShapesExperimentWPF
 
                 // add our latest observation value so we can use it for subsequent trials
                 // but keep the list count at our m value
-                ObservationList.RemoveAt(0);
+                if (ObservationList.Count == CurrentPhase.Observations)
+                {
+                    ObservationList.RemoveAt(0);
+                }
+               
                 ObservationList.Add(CurrentTrial.SuccessCount);
 
                 // save our current trial data and add it to our current phase's trial list
-                CurrentTrial.ResponseValue = successValues[responseIndex];
+                CurrentTrial.ResponseValue = successValues[responseIndex - 1];
                 CurrentTrial.Money = MoneyValue;
                 CurrentPhase.Trials.Add(CurrentTrial);
+
+                // update our money label
+                moneyLB.Content = MoneyValue.ToString("C");
             }
             catch (Exception e)
             {
@@ -527,14 +632,29 @@ namespace ShapesExperimentWPF
 
             if (CurrentMillis <= 0)
             {
-                rewardTimer.Stop();
+                moneyLB.Foreground = Brushes.Black;
+                toggleRewardTimer(false);
                 toggleRestTimer(true);
-                return;
             }
+            else
+            {
+                if (BlinkOn) moneyLB.Foreground = Brushes.White;
+                else moneyLB.Foreground = Brushes.Black;
+                BlinkOn = !BlinkOn;
+            }         
+        }
 
-            if (BlinkOn) moneyLB.Content = "";
-            else moneyLB.Content = MoneyValue;
-            BlinkOn = !BlinkOn;
+        private void toggleRewardTimer(bool on)
+        {
+            if (on)
+            {
+                CurrentMillis = 2000;
+                rewardTimer.Start();
+            }
+            else
+            {
+                rewardTimer.Stop();
+            }
         }
 
         private void toggleRestTimer(bool on)
@@ -542,29 +662,58 @@ namespace ShapesExperimentWPF
             if (on)
             {
                 CurrentMillis = TrialRestDuration * 1000;
-                // show our resting background and countdown label
-                // TODO
+                countDownLB.Visibility = Visibility.Visible;
+                Canvas.SetLeft(countDownLB, restCanvas.ActualWidth / 2 - countDownLB.ActualWidth / 2);
+                Canvas.SetTop(countDownLB, restCanvas.ActualHeight / 2 - countDownLB.ActualHeight / 2);
                 restTimer.Start();
             }
             else
             {
                 restTimer.Stop();
-                // hide our resting background
-                // bring our main canvas back up to the front
-                // redraw the board, start next trial
-                // TODO
-            }
-            
+                countDownLB.Visibility = Visibility.Hidden;
+                toggleRestCanvas(false);
+            }           
         }
 
         private void restTimer_Tick(object sender, EventArgs e)
         {
-            CurrentMillis -= restTimer.Interval.Milliseconds;
+            CurrentMillis -= restTimer.Interval.Seconds * 1000;
 
             if (CurrentMillis <= 0)
             {
+                // stop our resting timer and start the next trial
                 toggleRestTimer(false);
+                runTrial();
             }
+
+            countDownLB.Content = CurrentMillis / 1000;
+        }
+
+        private void toggleRestCanvas(bool on)
+        {
+            if (on)
+            {
+                restCanvas.Visibility = Visibility.Visible;
+                restCanvas.Width = mainCanvas.ActualWidth;
+                restCanvas.Height = mainCanvas.ActualHeight;
+
+                countDownLB.Content = TrialRestDuration;
+            }
+            else
+            {
+                restCanvas.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void clearMouseActions()
+        {
+            mainCanvas.ReleaseMouseCapture();
+
+            if (draggedImage != null)
+            {
+                Panel.SetZIndex(draggedImage, 0);
+                draggedImage = null;
+            }          
         }
     }
 }
