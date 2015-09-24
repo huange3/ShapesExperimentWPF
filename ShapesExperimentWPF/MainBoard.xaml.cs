@@ -43,6 +43,7 @@ namespace ShapesExperimentWPF
         private int CurrentTrialCount = 0;
         private int CurrentMillis = 0;
         private bool BlinkOn = true;
+        private bool RewardOn = false;
 
         static Random rand = new Random();
         private DispatcherTimer mainTimer = new DispatcherTimer();
@@ -52,6 +53,7 @@ namespace ShapesExperimentWPF
         private Image draggedImage;
         private Point mousePosition;
         private Point startMousePosition;
+        private Sounds soundPlayer;
 
         public mainBoard()
         {
@@ -121,6 +123,9 @@ namespace ShapesExperimentWPF
                 mainTimer.Tick += mainTimer_Tick;
                 rewardTimer.Tick += rewardTimer_Tick;
                 restTimer.Tick += restTimer_Tick;
+
+                // initialize our sound player
+                soundPlayer = new Sounds();
             }
             catch (Exception e)
             {
@@ -143,9 +148,17 @@ namespace ShapesExperimentWPF
 
                 if (PhaseQueue.Count == 0)
                 {
+                    var windows = Application.Current.Windows.OfType<MainWindow>();
+
+                    if (windows.Count() > 0)
+                    {
+                        var mainWindow = windows.First();
+                        mainWindow.Phases = this.Phases;
+                        mainWindow.outputData();
+                    }
+
                     this.Close();
                     MessageBox.Show("Experiment completed! Thank you for participating!");
-                    outputData();
                     
                     return false;
                 }
@@ -207,9 +220,6 @@ namespace ShapesExperimentWPF
 
                     CurrentTrial = new Trial();
                     CurrentTrialCount++;
-
-                    successCountLB.Content = "0";
-                    missCountLB.Content = "0";
 
                     mainTimer.Start();
                 }
@@ -352,68 +362,6 @@ namespace ShapesExperimentWPF
             return new Shape(id, filePath, true);
         }       
 
-        public void outputData()
-        {
-            StringBuilder builder = new StringBuilder();
-            var filePath = "";
-            var newLine = "";
-
-            try
-            {
-                // check if our directory exists, if it doesn't then create it
-                if (!Directory.Exists("./Data"))
-                {
-                    Directory.CreateDirectory("./Data");
-                }
-
-                filePath = String.Format("{0}{1}-{2}.txt", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
-
-                foreach (Phase p in Phases)
-                {
-                    // start with our phase
-                    newLine = "Condition,Background Color,Observations,Density,Rank Type,Response Index,Trial Duration,Trial Rest Duration\n";
-                    newLine += String.Format("{0},{1},{2},{3},{4},{5},{6},{7}{8}{9}",
-                        p.Label,
-                        p.BackgroundColor.ToString(),
-                        p.Observations,
-                        p.Density,
-                        p.RankType,
-                        p.ResponseIndex,
-                        TrialDuration,
-                        TrialRestDuration,
-                        Environment.NewLine,
-                        Environment.NewLine);
-
-                    // now write the trial data
-                    newLine += "Success Count,Miss Count,Money,Response Value\n";
-
-                    foreach(Trial t in p.Trials)
-                    {
-                        newLine += String.Format("{0},{1},{2},{3}{4}",
-                            t.SuccessCount,
-                            t.MissCount,
-                            t.Money,
-                            t.ResponseValue,
-                            Environment.NewLine);
-                    }
-
-                    newLine += "\n";
-                    builder.Append(newLine);
-                }
-
-                File.WriteAllText(filePath, builder.ToString());
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error occurred while writing data to file: " + e.Message);
-                throw e;
-            }
-            finally
-            {
-                builder = null;
-            }
-        }
-
         private void mainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Object temp = e.Source;
@@ -486,7 +434,7 @@ namespace ShapesExperimentWPF
             try
             {
                 // Check if our point is within a bucket's boundaries (do we need padding?)
-                // If no, then get of here!
+                // If not a hit, then get of here!
                 // If yes, check if we have the right bucket and shape pairing
                 // If we do, then success++ else miss++
                 if (point.X >= BucketA.Location.X 
@@ -497,12 +445,12 @@ namespace ShapesExperimentWPF
                     if (id == BucketA.ShapeID)
                     {
                         CurrentTrial.SuccessCount++;
-                        successCountLB.Content = CurrentTrial.SuccessCount;
+                        soundPlayer.playSuccess();
                     }
                     else
                     {
                         CurrentTrial.MissCount++;
-                        missCountLB.Content = CurrentTrial.MissCount;
+                        soundPlayer.playMiss();
                     }
                     
                     return true;
@@ -515,12 +463,12 @@ namespace ShapesExperimentWPF
                 {
                     if (id == BucketB.ShapeID) {
                         CurrentTrial.SuccessCount++;
-                        successCountLB.Content = CurrentTrial.SuccessCount;
+                        soundPlayer.playSuccess();
                     } 
                     else
                     {
                         CurrentTrial.MissCount++;
-                        missCountLB.Content = CurrentTrial.MissCount;
+                        soundPlayer.playMiss();
                     } 
                     return true;
                 }
@@ -542,9 +490,14 @@ namespace ShapesExperimentWPF
             mainTimer.Stop();
             clearMouseActions();
             calculateResponse();
+
             // start our reward timer so we can "flicker" the money amount
+            // also play our reward sound!
             toggleRestCanvas(true);
             toggleRewardTimer(true);
+
+            if (RewardOn) soundPlayer.playReward();
+            else soundPlayer.playNoReward();
         }
 
         private void calculateResponse()
@@ -586,7 +539,9 @@ namespace ShapesExperimentWPF
                     if (CurrentTrial.SuccessCount < successValues[responseIndex - 1])
                     {
                         MoneyValue += RewardValue;
+                        RewardOn = true;
                     }
+                    else RewardOn = false;
                 }
 
                 if (CurrentPhase.RankType == Constants.GreaterThan)
@@ -594,7 +549,9 @@ namespace ShapesExperimentWPF
                     if (CurrentTrial.SuccessCount > successValues[responseIndex - 1])
                     {
                         MoneyValue += RewardValue;
+                        RewardOn = true;
                     }
+                    else RewardOn = false;
                 }
 
                 // add our latest observation value so we can use it for subsequent trials

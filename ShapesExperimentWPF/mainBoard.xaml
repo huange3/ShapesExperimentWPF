@@ -11,10 +11,6 @@
     <Grid Background="Black">
         <Canvas x:Name="mainCanvas" MouseLeftButtonDown="mainCanvas_MouseLeftButtonDown" MouseLeftButtonUp="mainCanvas_MouseLeftButtonUp" MouseMove="mainCanvas_MouseMove" Background="White" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Loaded="mainCanvas_Loaded">
             <Label x:Name="moneyLB" Content="$0.00" FontFamily="Segoe WP Black" FontSize="30" Height="50" Canvas.Left="200" Canvas.Top="10" Panel.ZIndex="2" Background="White"/>
-            <Label x:Name="label" Content="Success:" Height="26" Canvas.Left="10" Canvas.Top="14" Width="53"/>
-            <Label x:Name="label1" Content="Miss:" Height="26" Canvas.Left="10" Canvas.Top="40" Width="36"/>
-            <Label x:Name="successCountLB" Content="0" Height="26" Canvas.Left="68" Canvas.Top="14" Width="16"/>
-            <Label x:Name="missCountLB" Content="0" Height="26" Canvas.Left="51" Canvas.Top="40" Width="16"/>
             <Canvas x:Name="restCanvas" Height="500" Width="500" Background="Black" Visibility="Hidden" Panel.ZIndex="1">
                 <Label x:Name="countDownLB" Content="20" Canvas.Left="227" Canvas.Top="202" FontFamily="Segoe WP Black" FontSize="40" Foreground="White" Visibility="Hidden"/>
             </Canvas>

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace ShapesExperimentWPF
 {
@@ -164,6 +165,68 @@ namespace ShapesExperimentWPF
         private void generateIDBtn_Click(object sender, RoutedEventArgs e)
         {
             generateID();
+        }
+
+        public void outputData()
+        {
+            StringBuilder builder = new StringBuilder();
+            var filePath = "";
+            var newLine = "";
+
+            try
+            {
+                // check if our directory exists, if it doesn't then create it
+                if (!Directory.Exists("./Data"))
+                {
+                    Directory.CreateDirectory("./Data");
+                }
+
+                filePath = String.Format("{0}{1}-{2}.txt", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
+
+                foreach (Phase p in Phases)
+                {
+                    // start with our phase
+                    newLine = "Condition,Background Color,Observations,Density,Rank Type,Response Index,Trial Duration,Trial Rest Duration\n";
+                    newLine += String.Format("{0},{1},{2},{3},{4},{5},{6},{7}{8}{9}",
+                        p.Label,
+                        p.BackgroundColor.ToString(),
+                        p.Observations,
+                        p.Density,
+                        p.RankType,
+                        p.ResponseIndex,
+                        TrialDuration,
+                        TrialRestDuration,
+                        Environment.NewLine,
+                        Environment.NewLine);
+
+                    // now write the trial data
+                    newLine += "Success Count,Miss Count,Money,Response Value\n";
+
+                    foreach (Trial t in p.Trials)
+                    {
+                        newLine += String.Format("{0},{1},{2},{3}{4}",
+                            t.SuccessCount,
+                            t.MissCount,
+                            t.Money,
+                            t.ResponseValue,
+                            Environment.NewLine);
+                    }
+
+                    newLine += "\n";
+                    builder.Append(newLine);
+                }
+
+                File.WriteAllText(filePath, builder.ToString());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred while writing data to file: " + e.Message);
+                throw e;
+            }
+            finally
+            {
+                builder = null;
+            }
         }
     }
 }

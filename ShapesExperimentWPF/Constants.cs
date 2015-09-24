@@ -17,11 +17,15 @@ namespace ShapesExperimentWPF
         public const char ShapeB = 'B';
         public const string ImageRoot = "pack://application:,,,/Images/";
         public const string DataRoot = "pack://application:,,,/Data/";
+        public const string SoundRoot = "pack://application:,,,/Sounds/";
 
         public const int NoRank = 0;
         public const int LessThan = 1;
         public const int GreaterThan = 2;
         public const int BucketWidth = 80;
         public const int BucketHeight = 80;
+        public const int SoundReward = 1;
+        public const int SoundCoin = 2;
+        public const int SoundGlass = 3;
     }
 }
