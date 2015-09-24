@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ShapesExperimentWPF"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="ShapesExperimentWPF.MainWindow"
         mc:Ignorable="d"
-        Title="Shapes Experiment" Height="522.917" Width="556.25" Icon="shape_move_backwards.ico" Loaded="Window_Loaded">
+        Title="Shapes Experiment" Height="523" Width="556" Icon="shape_move_backwards.ico" Loaded="Window_Loaded" ResizeMode="NoResize">
     <GroupBox x:Name="groupBox" Header="Settings" Margin="10">
         <Grid Margin="0,0,-2,0" HorizontalAlignment="Left" Width="518" Height="451" VerticalAlignment="Top">
             <Grid.RowDefinitions>
@@ -72,12 +72,12 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Label x:Name="label1" Content="Condition Order" HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="115" Margin="0,9,260,10" Height="24"/>
-                <TextBox x:Name="conditionOrderTB" HorizontalAlignment="Left" Height="22" Margin="240,11,0,0" TextWrapping="Wrap" Text="ABCBC" TextAlignment="Center" VerticalAlignment="Top" Width="120"/>
-                <Label x:Name="label1_Copy" Content="Participant ID" HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="125" Margin="0,43,260,19" Grid.RowSpan="2"/>
-                <TextBox x:Name="participantIDTB" HorizontalAlignment="Left" Height="22" Margin="240,0,0,0" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
+                <Label x:Name="label1" Content="Condition Order" HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="115" Margin="0,10,298,10" Height="24"/>
+                <TextBox x:Name="conditionOrderTB" HorizontalAlignment="Left" Height="22" Margin="202,11,0,0" TextWrapping="Wrap" Text="ABCBC" TextAlignment="Center" VerticalAlignment="Top" Width="120"/>
+                <Label x:Name="label1_Copy" Content="Participant ID" HorizontalAlignment="Right" VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="125" Margin="0,0,298,20" Grid.Row="1"/>
+                <TextBox x:Name="participantIDTB" HorizontalAlignment="Left" Height="22" Margin="202,0,0,0" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
                 <Button x:Name="startBtn" Content="Start" Margin="196,0,0,10" Grid.Row="2" Height="32" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Width="100" Click="startBtn_Click"/>
-                <Button x:Name="generateIDBtn" Content="Generate ID" HorizontalAlignment="Left" Margin="374,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="generateIDBtn_Click"/>
+                <Button x:Name="generateIDBtn" Content="Generate ID" HorizontalAlignment="Left" Margin="336,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="generateIDBtn_Click"/>
             </Grid>
         </Grid>
     </GroupBox>
