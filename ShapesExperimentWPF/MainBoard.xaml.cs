@@ -570,7 +570,7 @@ namespace ShapesExperimentWPF
                 toggleRewardTimer(false);
 
                 // decide whether or not we're going to show our rest or our phase rest screen
-                if (CurrentTrialCount == MainObservationCount)
+                if (CurrentTrialCount == CurrentPhase.Observations)
                 {
                     togglePhaseRestTimer(true);
                 } else
