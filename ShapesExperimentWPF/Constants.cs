@@ -24,8 +24,5 @@ namespace ShapesExperimentWPF
         public const int GreaterThan = 2;
         public const int BucketWidth = 80;
         public const int BucketHeight = 80;
-        public const int SoundReward = 1;
-        public const int SoundCoin = 2;
-        public const int SoundGlass = 3;
     }
 }

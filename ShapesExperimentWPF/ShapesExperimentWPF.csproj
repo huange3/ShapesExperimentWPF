@@ -51,7 +51,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>shape_move_backwards.ico</ApplicationIcon>
+    <ApplicationIcon>heart_empty.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>229944850981BEBE310A11A42968B74A5934269A</ManifestCertificateThumbprint>
@@ -142,6 +142,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -155,37 +156,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="shape_move_backwards.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Data\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\blue-01.png" />
-    <Resource Include="Images\blue-02.png" />
-    <Resource Include="Images\blue-03.png" />
-    <Resource Include="Images\blue-04.png" />
-    <Resource Include="Images\blue-05.png" />
-    <Resource Include="Images\bucket-01.png" />
-    <Resource Include="Images\bucket-02.png" />
-    <Resource Include="Images\bucket-03.png" />
-    <Resource Include="Images\bucket-04.png" />
-    <Resource Include="Images\bucket-05.png" />
-    <Resource Include="Images\bucket-empty.png" />
-    <Resource Include="Images\gray-01.png" />
-    <Resource Include="Images\gray-02.png" />
-    <Resource Include="Images\gray-03.png" />
-    <Resource Include="Images\gray-04.png" />
-    <Resource Include="Images\gray-05.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\cashRegister.wav" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\coins.wav" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\glassBreak.wav" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\toneHit.wav" />
@@ -201,6 +175,35 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\bucket-diamond.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\bucket-heart.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\bucket-moon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\bucket-sun.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\diamond-01.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\heart-01.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\moon-02.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\sun-02.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="heart_empty.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

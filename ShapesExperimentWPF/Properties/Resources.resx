@@ -121,12 +121,6 @@
   <data name="cashRegister" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\cashRegister.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="coins" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\coins.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="glassBreak" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\glassBreak.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="toneHit" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\toneHit.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

@@ -16,18 +16,6 @@ namespace ShapesExperimentWPF
             Player = new SoundPlayer();
         }
 
-        public void playSuccess()
-        {
-            Player.Stream = Properties.Resources.coins;
-            Player.Play();
-        }
-
-        public void playMiss()
-        {
-            Player.Stream = Properties.Resources.glassBreak;
-            Player.Play();
-        }
-
         public void playReward()
         {
             Player.Stream = Properties.Resources.cashRegister;

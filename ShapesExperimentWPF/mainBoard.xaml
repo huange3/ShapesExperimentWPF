@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShapesExperimentWPF"
         mc:Ignorable="d"
-        Title="Experiment Board" Height="505" Width="755" Icon="shape_move_backwards.ico"
+        Title="Experiment Board" Height="505" Width="755" Icon="heart_empty.ico"
         WindowStyle="None" ResizeMode="NoResize"  
     WindowStartupLocation="CenterScreen" WindowState="Maximized" KeyDown="Window_KeyDown" Closing="Window_Closing">
     <Grid Background="Black">

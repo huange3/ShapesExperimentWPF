@@ -36,18 +36,21 @@ namespace ShapesExperimentWPF
         private List<int> ObservationList = new List<int>();
 
         public string ParticipantID = "";
+        public int MainObservationCount = 0;
         public int TrialDuration = 0;
         public int TrialRestDuration = 0;
+        public int PhaseRestDuration = 0;
         public decimal MoneyValue;
         public decimal RewardValue;
         private int CurrentTrialCount = 0;
-        private int CurrentMillis = 0;
+        private int CurrentMillis = 0;      
         private bool BlinkOn = true;
         private bool RewardOn = false;
 
         static Random rand = new Random();
         private DispatcherTimer mainTimer = new DispatcherTimer();
         private DispatcherTimer restTimer = new DispatcherTimer();
+        private DispatcherTimer phaseRestTimer = new DispatcherTimer();
         private DispatcherTimer rewardTimer = new DispatcherTimer();
 
         private Image draggedImage;
@@ -78,6 +81,7 @@ namespace ShapesExperimentWPF
         {
             // clean up after ourselves :)
             mainCanvas.Children.RemoveRange(0, mainCanvas.Children.Count);
+            disposeObjects();
         }
 
         public void initializeBoard()
@@ -86,19 +90,13 @@ namespace ShapesExperimentWPF
             {
                 BaselineShapes = new List<Shape>();
 
-                BaselineShapes.Add(new Shape(1, "gray-01.png"));
-                BaselineShapes.Add(new Shape(2, "gray-02.png"));
-                BaselineShapes.Add(new Shape(3, "gray-03.png"));
-                BaselineShapes.Add(new Shape(4, "gray-04.png"));
-                BaselineShapes.Add(new Shape(5, "gray-05.png"));
+                BaselineShapes.Add(new Shape(1, "heart-01.png"));
+                BaselineShapes.Add(new Shape(2, "diamond-01.png"));
 
                 TrialShapes = new List<Shape>();
 
-                TrialShapes.Add(new Shape(1, "blue-01.png"));
-                TrialShapes.Add(new Shape(2, "blue-02.png"));
-                TrialShapes.Add(new Shape(3, "blue-03.png"));
-                TrialShapes.Add(new Shape(4, "blue-04.png"));
-                TrialShapes.Add(new Shape(5, "blue-05.png"));
+                TrialShapes.Add(new Shape(3, "sun-02.png"));
+                TrialShapes.Add(new Shape(4, "moon-02.png"));
 
                 // create ourselves a board that we can shuffle to drive 
                 // the drawBoard() function
@@ -118,11 +116,13 @@ namespace ShapesExperimentWPF
                 // set up our timers
                 mainTimer.Interval = TimeSpan.FromSeconds(TrialDuration);
                 restTimer.Interval = TimeSpan.FromSeconds(1); // need 1 second intervals to show a countdown timer
+                phaseRestTimer.Interval = TimeSpan.FromSeconds(1);
                 rewardTimer.Interval = TimeSpan.FromMilliseconds(200); // get the money label to blink a few times
 
                 mainTimer.Tick += mainTimer_Tick;
                 rewardTimer.Tick += rewardTimer_Tick;
                 restTimer.Tick += restTimer_Tick;
+                phaseRestTimer.Tick += phaseRestTimer_Tick;
 
                 // initialize our sound player
                 soundPlayer = new Sounds();
@@ -148,6 +148,7 @@ namespace ShapesExperimentWPF
 
                 if (PhaseQueue.Count == 0)
                 {
+                    // find our main window and call the outputData() function
                     var windows = Application.Current.Windows.OfType<MainWindow>();
 
                     if (windows.Count() > 0)
@@ -163,25 +164,16 @@ namespace ShapesExperimentWPF
                     return false;
                 }
 
-                /* MODUS OPERANDI
-                ------------------
-                1. Dequeue our first phase
-                2. Check the phase type (special shapes for baseline)
-                3. Draw our board
-                4. Start the timer*/
-
                 CurrentPhase = PhaseQueue.Dequeue();
 
                 // pick our two random shapes by shuffling our shape lists and taking the first two shapes
                 if (CurrentPhase.Label == Constants.PhaseBaseline)
                 {
-                    BaselineShapes.Shuffle();
                     ShapeA = BaselineShapes[0];
                     ShapeB = BaselineShapes[1];
                 }
                 else
                 {
-                    TrialShapes.Shuffle();
                     ShapeA = TrialShapes[0];
                     ShapeB = TrialShapes[1];
                 }
@@ -337,22 +329,16 @@ namespace ShapesExperimentWPF
             switch (id)
             {
                 case 1:
-                    filePath = "bucket-01.png";
+                    filePath = "bucket-heart.png";
                     break;
                 case 2:
-                    filePath = "bucket-02.png";
+                    filePath = "bucket-diamond.png";
                     break;
                 case 3:
-                    filePath = "bucket-03.png";
+                    filePath = "bucket-sun.png";
                     break;
                 case 4:
-                    filePath = "bucket-04.png";
-                    break;
-                case 5:
-                    filePath = "bucket-05.png";
-                    break;
-                case 6:
-                    filePath = "bucket-06.png";
+                    filePath = "bucket-moon.png";
                     break;
                 default:
                     filePath = "";
@@ -445,12 +431,10 @@ namespace ShapesExperimentWPF
                     if (id == BucketA.ShapeID)
                     {
                         CurrentTrial.SuccessCount++;
-                        soundPlayer.playSuccess();
                     }
                     else
                     {
                         CurrentTrial.MissCount++;
-                        soundPlayer.playMiss();
                     }
                     
                     return true;
@@ -463,12 +447,10 @@ namespace ShapesExperimentWPF
                 {
                     if (id == BucketB.ShapeID) {
                         CurrentTrial.SuccessCount++;
-                        soundPlayer.playSuccess();
                     } 
                     else
                     {
                         CurrentTrial.MissCount++;
-                        soundPlayer.playMiss();
                     } 
                     return true;
                 }
@@ -492,8 +474,7 @@ namespace ShapesExperimentWPF
             calculateResponse();
 
             // start our reward timer so we can "flicker" the money amount
-            // also play our reward sound!
-            toggleRestCanvas(true);
+            // also play our reward sound!        
             toggleRewardTimer(true);
 
             if (RewardOn) soundPlayer.playReward();
@@ -507,7 +488,7 @@ namespace ShapesExperimentWPF
 
             try
             {
-                // If this is the baseline phase, then skip!
+                // If this is the baseline phase, then skip calculations and just add to list!
                 // Otherwise, get our observations from the baseline phase
                 // Sort the success values according to the phase rank
                 // Get our response index from the current phase info
@@ -520,15 +501,7 @@ namespace ShapesExperimentWPF
                     return;
                 }
 
-                //// check if we have an observation list to compare to
-                //// if not, load it from the baseline phase
-                //if (ObservationList.Count == 0)
-                //{
-                //    ObservationList = (from t in Phases[0].Trials
-                //                       select t.SuccessCount).ToList();
-                //}
-
-                responseIndex = CurrentPhase.ResponseIndex;
+                responseIndex = (int)Math.Floor((MainObservationCount + 1) * (1 - CurrentPhase.Density));
 
                 successValues = (from o in ObservationList
                                  orderby o ascending
@@ -555,8 +528,8 @@ namespace ShapesExperimentWPF
                 }
 
                 // add our latest observation value so we can use it for subsequent trials
-                // but keep the list count at our m value
-                if (ObservationList.Count == CurrentPhase.Observations)
+                // but keep the list count at our main m value
+                if (ObservationList.Count == MainObservationCount)
                 {
                     ObservationList.RemoveAt(0);
                 }
@@ -591,7 +564,15 @@ namespace ShapesExperimentWPF
             {
                 moneyLB.Foreground = Brushes.Black;
                 toggleRewardTimer(false);
-                toggleRestTimer(true);
+
+                // decide whether or not we're going to show our rest or our phase rest screen
+                if (CurrentTrialCount == MainObservationCount)
+                {
+                    togglePhaseRestTimer(true);
+                } else
+                {
+                    toggleRestTimer(true);
+                }
             }
             else
             {
@@ -605,6 +586,7 @@ namespace ShapesExperimentWPF
         {
             if (on)
             {
+                toggleRestCanvas(true);
                 CurrentMillis = 2000;
                 rewardTimer.Start();
             }
@@ -618,6 +600,7 @@ namespace ShapesExperimentWPF
         {
             if (on)
             {
+                toggleRestCanvas(true);
                 CurrentMillis = TrialRestDuration * 1000;
                 countDownLB.Visibility = Visibility.Visible;
                 Canvas.SetLeft(countDownLB, restCanvas.ActualWidth / 2 - countDownLB.ActualWidth / 2);
@@ -630,6 +613,26 @@ namespace ShapesExperimentWPF
                 countDownLB.Visibility = Visibility.Hidden;
                 toggleRestCanvas(false);
             }           
+        }
+
+        private void togglePhaseRestTimer(bool on)
+        {
+            if (on)
+            {
+                toggleRestCanvas(true);
+                CurrentMillis = PhaseRestDuration * 1000;
+                countDownLB.Visibility = Visibility.Visible;
+                countDownLB.Content = PhaseRestDuration;
+                Canvas.SetLeft(countDownLB, restCanvas.ActualWidth / 2 - countDownLB.ActualWidth / 2);
+                Canvas.SetTop(countDownLB, restCanvas.ActualHeight / 2 - countDownLB.ActualHeight / 2);
+                phaseRestTimer.Start();
+            }
+            else
+            {
+                phaseRestTimer.Stop();
+                countDownLB.Visibility = Visibility.Hidden;
+                toggleRestCanvas(false);
+            }
         }
 
         private void restTimer_Tick(object sender, EventArgs e)
@@ -671,6 +674,37 @@ namespace ShapesExperimentWPF
                 Panel.SetZIndex(draggedImage, 0);
                 draggedImage = null;
             }          
+        }
+
+        private void phaseRestTimer_Tick(object sender, EventArgs e)
+        {
+            CurrentMillis -= phaseRestTimer.Interval.Seconds * 1000;
+
+            if (CurrentMillis <= 0)
+            {
+                // stop our resting timer and call runTrial()
+                // runTrial() will decide if we go to the next phase or not
+                togglePhaseRestTimer(false);
+                runTrial();
+            }
+
+            countDownLB.Content = CurrentMillis / 1000;
+        }
+
+        private void disposeObjects()
+        {
+            Phases = null;
+            PhaseQueue = null;
+            SkeletonBoard = null;
+            BaselineShapes = null;
+            TrialShapes = null;
+            ImageSet = null;
+            ObservationList = null;
+            mainTimer = null;
+            restTimer = null;
+            phaseRestTimer = null;
+            rewardTimer = null;
+            soundPlayer = null;
         }
     }
 }

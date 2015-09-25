@@ -14,7 +14,6 @@ namespace ShapesExperimentWPF
         public int Observations { get; set; } = 0;
         public decimal Density { get; set; } = 0;
         public int RankType { get; set; } = 0;
-        public int ResponseIndex { get; set; } = 0;
         public List<Trial> Trials { get; set; }
 
         public Phase(char label, Color color, int m, decimal w, int rank)
@@ -24,12 +23,6 @@ namespace ShapesExperimentWPF
             this.Observations = m;
             this.Density = w;
             this.RankType = rank;
-
-            if (w > 0)
-            {
-                this.ResponseIndex = (int)Math.Floor((m + 1) * (1 - w));
-            }
-            
             this.Trials = new List<Trial>();
         }
     }
