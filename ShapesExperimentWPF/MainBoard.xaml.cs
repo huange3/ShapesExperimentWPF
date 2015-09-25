@@ -81,6 +81,10 @@ namespace ShapesExperimentWPF
         {
             // clean up after ourselves :)
             mainCanvas.Children.RemoveRange(0, mainCanvas.Children.Count);
+            mainTimer.Stop();
+            rewardTimer.Stop();
+            restTimer.Stop();
+            phaseRestTimer.Stop();
             disposeObjects();
         }
 
