@@ -204,7 +204,7 @@ namespace ShapesExperimentWPF
             try
             {
                 // If we've already hit our trial limit, then kick them over to the next phase.
-                if (CurrentTrialCount == CurrentPhase.Observations)
+                if (CurrentTrialCount == CurrentPhase.TrialCount)
                 {
                     CurrentTrialCount = 0;
                     Phases.Add(CurrentPhase);
@@ -570,7 +570,7 @@ namespace ShapesExperimentWPF
                 toggleRewardTimer(false);
 
                 // decide whether or not we're going to show our rest or our phase rest screen
-                if (CurrentTrialCount == CurrentPhase.Observations)
+                if (CurrentTrialCount == CurrentPhase.TrialCount)
                 {
                     togglePhaseRestTimer(true);
                 } else

@@ -83,6 +83,7 @@ namespace ShapesExperimentWPF
         {
             var conditionOrderStr = "";
             var phaseObservationCount = 0;
+            var baselineObservationCount = 0;
             decimal currBDensity;
             decimal currCDensity;
             Phase currPhase = null;
@@ -107,6 +108,7 @@ namespace ShapesExperimentWPF
                 RewardValue = (decimal)rewardIncrementUD.Value;
 
                 MainObservationCount = (int)observationsUD.Value;
+                baselineObservationCount = (int)baselineObservationsUD.Value;
                 phaseObservationCount = (int)phaseObservationsUD.Value;
                 currBDensity = (decimal)BDensityUD.Value;
                 currCDensity = (decimal)CDensityUD.Value;
@@ -117,17 +119,32 @@ namespace ShapesExperimentWPF
 
                     if (currChar == Constants.PhaseBaseline)
                     {
-                        currPhase = new Phase(Constants.PhaseBaseline, currAColor, MainObservationCount, 0, Constants.NoRank);
+                        currPhase = new Phase(Constants.PhaseBaseline, 
+                            currAColor, 
+                            MainObservationCount, 
+                            0, 
+                            Constants.NoRank, 
+                            baselineObservationCount);
                     }
 
                     if (currChar == Constants.PhaseB)
                     {
-                        currPhase = new Phase(Constants.PhaseB, currBColor, phaseObservationCount, currBDensity, Constants.LessThan);
+                        currPhase = new Phase(Constants.PhaseB, 
+                            currBColor, 
+                            MainObservationCount, 
+                            currBDensity, 
+                            Constants.LessThan, 
+                            phaseObservationCount);
                     }
 
                     if (currChar == Constants.PhaseC)
                     {
-                        currPhase = new Phase(Constants.PhaseC, currCColor, phaseObservationCount, currCDensity, Constants.GreaterThan);
+                        currPhase = new Phase(Constants.PhaseC, 
+                            currCColor, 
+                            MainObservationCount, 
+                            currCDensity, 
+                            Constants.GreaterThan, 
+                            phaseObservationCount);
                     }
 
                     Phases.Add(currPhase);
@@ -197,8 +214,8 @@ namespace ShapesExperimentWPF
                 foreach (Phase p in Phases)
                 {
                     // start with our phase
-                    newLine = "Phase,Background Color,Observations,Density,Rank Type,Trial Duration,Trial Rest Duration\n";
-                    newLine += String.Format("{0},{1},{2},{3},{4},{5},{6}{7}{8}",
+                    newLine = "Phase,Background Color,Observations,Density,Rank Type,Trial Time,Trial Rest Time,Phase Rest Time,Number of Trials\n";
+                    newLine += String.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}{9}{10}",
                         p.Label,
                         p.BackgroundColor.ToString(),
                         p.Observations,
@@ -206,6 +223,8 @@ namespace ShapesExperimentWPF
                         p.RankType,
                         TrialDuration,
                         TrialRestDuration,
+                        PhaseRestDuration,
+                        p.TrialCount,
                         Environment.NewLine,
                         Environment.NewLine);
 
