@@ -110,7 +110,7 @@ namespace ShapesExperimentWPF
                 {
                     if (i == 0) SkeletonBoard.Add(Constants.BucketA);
 
-                    else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
+                    //else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
 
                     else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
 
@@ -182,9 +182,9 @@ namespace ShapesExperimentWPF
                     ShapeB = TrialShapes[1];
                 }
 
-                // find our respective buckets
-                BucketA = findBucket(ShapeA.ShapeID);
-                BucketB = findBucket(ShapeB.ShapeID);
+                // 10/26/15 Only one bucket now, bucket shape dependent on phase
+                BucketA = findBucket();
+               // BucketB = findBucket(ShapeB.ShapeID);
 
                 runTrial();
 
@@ -326,27 +326,43 @@ namespace ShapesExperimentWPF
             }
         }
 
-        private Shape findBucket(int id)
+        private Shape findBucket()
         {
+            int id = 0;
             string filePath = "";
 
-            switch (id)
+            //switch (id)
+            //{
+            //    case 1:
+            //        filePath = "bucket-heart.png";
+            //        break;
+            //    case 2:
+            //        filePath = "bucket-diamond.png";
+            //        break;
+            //    case 3:
+            //        filePath = "bucket-sun.png";
+            //        break;
+            //    case 4:
+            //        filePath = "bucket-moon.png";
+            //        break;
+            //    default:
+            //        filePath = "";
+            //        break;
+            //}
+
+            // 10/26/15 bucket is now dependent on phase
+            if (CurrentPhase.Label == Constants.PhaseBaseline)
             {
-                case 1:
-                    filePath = "bucket-heart.png";
-                    break;
-                case 2:
-                    filePath = "bucket-diamond.png";
-                    break;
-                case 3:
-                    filePath = "bucket-sun.png";
-                    break;
-                case 4:
-                    filePath = "bucket-moon.png";
-                    break;
-                default:
-                    filePath = "";
-                    break;
+                id = 1;
+                filePath = "bucket-heart.png";
+            } else if (CurrentPhase.Label == Constants.PhaseB)
+            {
+                id = 3;
+                filePath = "bucket-sun.png";
+            } else if (CurrentPhase.Label == Constants.PhaseC)
+            {
+                id = 4;
+                filePath = "bucket-moon.png";
             }
 
             return new Shape(id, filePath, true);
@@ -393,8 +409,11 @@ namespace ShapesExperimentWPF
                 } else
                 {
                     // return this image to where it was originally
-                    Canvas.SetLeft(draggedImage, startMousePosition.X);
-                    Canvas.SetTop(draggedImage, startMousePosition.Y);
+                    Canvas.SetLeft(draggedImage, startMousePosition.X - 30);
+                    Canvas.SetTop(draggedImage, startMousePosition.Y - 30);
+
+                    // 10/26/15 aaaand count it as a miss
+                    CurrentTrial.MissCount++;
                 }
 
                 mainCanvas.ReleaseMouseCapture();
@@ -444,20 +463,20 @@ namespace ShapesExperimentWPF
                     return true;
                 }
 
-                if (point.X >= BucketB.Location.X
-                    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
-                    && point.Y >= BucketB.Location.Y
-                    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
-                {
-                    if (id == BucketB.ShapeID) {
-                        CurrentTrial.SuccessCount++;
-                    } 
-                    else
-                    {
-                        CurrentTrial.MissCount++;
-                    } 
-                    return true;
-                }
+                //if (point.X >= BucketB.Location.X
+                //    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
+                //    && point.Y >= BucketB.Location.Y
+                //    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
+                //{
+                //    if (id == BucketB.ShapeID) {
+                //        CurrentTrial.SuccessCount++;
+                //    } 
+                //    else
+                //    {
+                //        CurrentTrial.MissCount++;
+                //    } 
+                //    return true;
+                //}
 
                 return false;
             }
