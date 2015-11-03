@@ -95,7 +95,7 @@ namespace ShapesExperimentWPF
                 BaselineShapes = new List<Shape>();
 
                 BaselineShapes.Add(new Shape(1, "heart-01.png"));
-                BaselineShapes.Add(new Shape(2, "diamond-01.png"));
+                //BaselineShapes.Add(new Shape(2, "diamond-01.png"));
 
                 TrialShapes = new List<Shape>();
 
@@ -112,9 +112,9 @@ namespace ShapesExperimentWPF
 
                     //else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
 
-                    else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
+                    //else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
 
-                    else SkeletonBoard.Add(Constants.ShapeB);
+                    else SkeletonBoard.Add(Constants.ShapeA);
                 }
 
                 // set up our timers
@@ -170,16 +170,21 @@ namespace ShapesExperimentWPF
 
                 CurrentPhase = PhaseQueue.Dequeue();
 
-                // pick our two random shapes by shuffling our shape lists and taking the first two shapes
+                // 20151102
+                // only one shape per phase!
                 if (CurrentPhase.Label == Constants.PhaseBaseline)
                 {
                     ShapeA = BaselineShapes[0];
-                    ShapeB = BaselineShapes[1];
+                    //ShapeB = BaselineShapes[1];
                 }
-                else
+                else if (CurrentPhase.Label == Constants.PhaseB)
                 {
                     ShapeA = TrialShapes[0];
-                    ShapeB = TrialShapes[1];
+                    //ShapeB = TrialShapes[1];
+                }
+                else if (CurrentPhase.Label == Constants.PhaseC)
+                {
+                    ShapeA = TrialShapes[1];
                 }
 
                 // 10/26/15 Only one bucket now, bucket shape dependent on phase
