@@ -95,7 +95,7 @@ namespace ShapesExperimentWPF
                 BaselineShapes = new List<Shape>();
 
                 BaselineShapes.Add(new Shape(1, "heart-01.png"));
-                //BaselineShapes.Add(new Shape(2, "diamond-01.png"));
+                BaselineShapes.Add(new Shape(2, "diamond-01.png"));
 
                 TrialShapes = new List<Shape>();
 
@@ -110,11 +110,11 @@ namespace ShapesExperimentWPF
                 {
                     if (i == 0) SkeletonBoard.Add(Constants.BucketA);
 
-                    //else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
+                    else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
 
-                    //else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
+                    else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
 
-                    else SkeletonBoard.Add(Constants.ShapeA);
+                    else SkeletonBoard.Add(Constants.ShapeB);
                 }
 
                 // set up our timers
@@ -170,26 +170,25 @@ namespace ShapesExperimentWPF
 
                 CurrentPhase = PhaseQueue.Dequeue();
 
-                // 20151102
-                // only one shape per phase!
                 if (CurrentPhase.Label == Constants.PhaseBaseline)
                 {
                     ShapeA = BaselineShapes[0];
-                    //ShapeB = BaselineShapes[1];
+                    ShapeB = BaselineShapes[1];
                 }
                 else if (CurrentPhase.Label == Constants.PhaseB)
                 {
                     ShapeA = TrialShapes[0];
-                    //ShapeB = TrialShapes[1];
+                    ShapeB = TrialShapes[1];
                 }
                 else if (CurrentPhase.Label == Constants.PhaseC)
                 {
-                    ShapeA = TrialShapes[1];
+                    ShapeA = TrialShapes[0];
+                    ShapeB = TrialShapes[1];
                 }
 
                 // 10/26/15 Only one bucket now, bucket shape dependent on phase
-                BucketA = findBucket();
-               // BucketB = findBucket(ShapeB.ShapeID);
+                BucketA = findBucket(ShapeA.ShapeID);
+                BucketB = findBucket(ShapeB.ShapeID);
 
                 runTrial();
 
@@ -331,9 +330,8 @@ namespace ShapesExperimentWPF
             }
         }
 
-        private Shape findBucket()
+        private Shape findBucket(int id)
         {
-            int id = 0;
             string filePath = "";
 
             //switch (id)
@@ -354,21 +352,7 @@ namespace ShapesExperimentWPF
             //        filePath = "";
             //        break;
             //}
-
-            // 10/26/15 bucket is now dependent on phase
-            if (CurrentPhase.Label == Constants.PhaseBaseline)
-            {
-                id = 1;
-                filePath = "bucket-heart.png";
-            } else if (CurrentPhase.Label == Constants.PhaseB)
-            {
-                id = 3;
-                filePath = "bucket-sun.png";
-            } else if (CurrentPhase.Label == Constants.PhaseC)
-            {
-                id = 4;
-                filePath = "bucket-moon.png";
-            }
+            filePath = "bucket-empty.png";
 
             return new Shape(id, filePath, true);
         }       
@@ -468,20 +452,21 @@ namespace ShapesExperimentWPF
                     return true;
                 }
 
-                //if (point.X >= BucketB.Location.X
-                //    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
-                //    && point.Y >= BucketB.Location.Y
-                //    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
-                //{
-                //    if (id == BucketB.ShapeID) {
-                //        CurrentTrial.SuccessCount++;
-                //    } 
-                //    else
-                //    {
-                //        CurrentTrial.MissCount++;
-                //    } 
-                //    return true;
-                //}
+                if (point.X >= BucketB.Location.X
+                    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
+                    && point.Y >= BucketB.Location.Y
+                    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
+                {
+                    if (id == BucketB.ShapeID)
+                    {
+                        CurrentTrial.SuccessCount++;
+                    }
+                    else
+                    {
+                        CurrentTrial.MissCount++;
+                    }
+                    return true;
+                }
 
                 return false;
             }
@@ -495,7 +480,7 @@ namespace ShapesExperimentWPF
 
         private void mainTimer_Tick(object sender, EventArgs e)
         {
-            // Trial ended, make sure to clear our mouse so we're picking up any pieces
+            // Trial ended, make sure to clear our mouse so we're not picking up any pieces
             // Do calculations, add to our trial list and continue
             mainTimer.Stop();
             clearMouseActions();
