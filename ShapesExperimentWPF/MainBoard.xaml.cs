@@ -94,28 +94,32 @@ namespace ShapesExperimentWPF
             {
                 BaselineShapes = new List<Shape>();
 
-                BaselineShapes.Add(new Shape(1, "heart-01.png"));
-                BaselineShapes.Add(new Shape(2, "diamond-01.png"));
+                //BaselineShapes.Add(new Shape(1, "heart-01.png"));
+                //BaselineShapes.Add(new Shape(2, "diamond-01.png"));
+
+                BaselineShapes.Add(new Shape(1, "circle.png"));
 
                 TrialShapes = new List<Shape>();
 
-                TrialShapes.Add(new Shape(3, "sun-02.png"));
-                TrialShapes.Add(new Shape(4, "moon-02.png"));
+                //TrialShapes.Add(new Shape(3, "sun-02.png"));
+                //TrialShapes.Add(new Shape(4, "moon-02.png"));
+
+                TrialShapes.Add(new Shape(1, "circle.png"));
 
                 // create ourselves a board that we can shuffle to drive 
                 // the drawBoard() function
                 // X & Y are buckets
                 // A is shape #1, B is shape #2
-                for (var i = 0; i < 64; i++)
-                {
-                    if (i == 0) SkeletonBoard.Add(Constants.BucketA);
+                //for (var i = 0; i < 64; i++)
+                //{
+                //    if (i == 0) SkeletonBoard.Add(Constants.BucketA);
 
-                    else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
+                //    else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
 
-                    else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
+                //    else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
 
-                    else SkeletonBoard.Add(Constants.ShapeB);
-                }
+                //    else SkeletonBoard.Add(Constants.ShapeB);
+                //}
 
                 // set up our timers
                 mainTimer.Interval = TimeSpan.FromSeconds(TrialDuration);
@@ -136,7 +140,6 @@ namespace ShapesExperimentWPF
                 MessageBox.Show("Error occurred while initializing the board: " + e.Message);
                 throw e;
             }
-
         }
 
         public bool runPhase()
@@ -170,25 +173,27 @@ namespace ShapesExperimentWPF
 
                 CurrentPhase = PhaseQueue.Dequeue();
 
-                if (CurrentPhase.Label == Constants.PhaseBaseline)
-                {
-                    ShapeA = BaselineShapes[0];
-                    ShapeB = BaselineShapes[1];
-                }
-                else if (CurrentPhase.Label == Constants.PhaseB)
-                {
-                    ShapeA = TrialShapes[0];
-                    ShapeB = TrialShapes[1];
-                }
-                else if (CurrentPhase.Label == Constants.PhaseC)
-                {
-                    ShapeA = TrialShapes[0];
-                    ShapeB = TrialShapes[1];
-                }
+                //if (CurrentPhase.Label == Constants.PhaseBaseline)
+                //{
+                //    ShapeA = BaselineShapes[0];
+                //    ShapeB = BaselineShapes[1];
+                //}
+                //else if (CurrentPhase.Label == Constants.PhaseB)
+                //{
+                //    ShapeA = TrialShapes[0];
+                //    ShapeB = TrialShapes[1];
+                //}
+                //else if (CurrentPhase.Label == Constants.PhaseC)
+                //{
+                //    ShapeA = TrialShapes[0];
+                //    ShapeB = TrialShapes[1];
+                //}
 
-                // 10/26/15 Only one bucket now, bucket shape dependent on phase
+                // 11/30/2015 Changed to one bucket, one circle shape
+                ShapeA = BaselineShapes[0];
+
                 BucketA = findBucket(ShapeA.ShapeID);
-                BucketB = findBucket(ShapeB.ShapeID);
+                //BucketB = findBucket(ShapeB.ShapeID);
 
                 runTrial();
 
@@ -256,64 +261,99 @@ namespace ShapesExperimentWPF
 
                     // shuffle our skeleton board and then draw the controls
                     // onto the board
-                    SkeletonBoard.Shuffle();
+                    //SkeletonBoard.Shuffle();
 
-                    for (var i = 0; i < SkeletonBoard.Count; i++)
-                    {
-                        if (i == 0)
-                        {
-                            xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4;
-                            yLoc = (int)mainCanvas.ActualHeight / 2 - 64 * 4;
-                        }
-                        else if (i > 0 && i % 8 == 0)
-                        {
-                            xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4; ;
-                            yLoc += 65;
-                        }
-                        else if (i > 0)
-                        {
-                            xLoc += 65;
-                        }
+                    //for (var i = 0; i < SkeletonBoard.Count; i++)
+                    //{
+                    //    if (i == 0)
+                    //    {
+                    //        xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4;
+                    //        yLoc = (int)mainCanvas.ActualHeight / 2 - 64 * 4;
+                    //    }
+                    //    else if (i > 0 && i % 8 == 0)
+                    //    {
+                    //        xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4; ;
+                    //        yLoc += 65;
+                    //    }
+                    //    else if (i > 0)
+                    //    {
+                    //        xLoc += 65;
+                    //    }
 
-                        // if these shapes are buckets, remember to save their locations
-                        // assign tags to all objects so we can check their shape IDs
-                        switch (SkeletonBoard[i])
-                        {
-                            case Constants.BucketA:
-                                currImage = BucketA.ImagePath;
-                                BucketA.Location = new Point(xLoc, yLoc);
-                                currTag = BucketA;
-                                break;
-                            case Constants.BucketB:
-                                currImage = BucketB.ImagePath;                               
-                                BucketB.Location = new Point(xLoc, yLoc);
-                                currTag = BucketB;
-                                break;
-                            case Constants.ShapeA:
-                                currImage = ShapeA.ImagePath;
-                                currTag = ShapeA;
-                                break;
-                            case Constants.ShapeB:
-                                currImage = ShapeB.ImagePath;
-                                currTag = ShapeB;
-                                break;
-                            default:
-                                break;
-                        }
+                    //    // if these shapes are buckets, remember to save their locations
+                    //    // assign tags to all objects so we can check their shape IDs
+                    //    switch (SkeletonBoard[i])
+                    //    {
+                    //        case Constants.BucketA:
+                    //            currImage = BucketA.ImagePath;
+                    //            BucketA.Location = new Point(xLoc, yLoc);
+                    //            currTag = BucketA;
+                    //            break;
+                    //        case Constants.BucketB:
+                    //            currImage = BucketB.ImagePath;                               
+                    //            BucketB.Location = new Point(xLoc, yLoc);
+                    //            currTag = BucketB;
+                    //            break;
+                    //        case Constants.ShapeA:
+                    //            currImage = ShapeA.ImagePath;
+                    //            currTag = ShapeA;
+                    //            break;
+                    //        case Constants.ShapeB:
+                    //            currImage = ShapeB.ImagePath;
+                    //            currTag = ShapeB;
+                    //            break;
+                    //        default:
+                    //            break;
+                    //    }
 
-                        // create our new image control and add it to the main canvas
-                        newImage = new Image();
-                        newImage.Source = new BitmapImage(currImage);
-                        newImage.Tag = currTag;
-                        newImage.Width = newImage.Source.Width;
-                        newImage.Height = newImage.Source.Height;
+                    //    // create our new image control and add it to the main canvas
+                    //    newImage = new Image();
+                    //    newImage.Source = new BitmapImage(currImage);
+                    //    newImage.Tag = currTag;
+                    //    newImage.Width = newImage.Source.Width;
+                    //    newImage.Height = newImage.Source.Height;
 
-                        mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
-                        mainCanvas.Children.Add(newImage);
-                        ImageSet.Add(newImage);
-                        Canvas.SetTop(newImage, yLoc);
-                        Canvas.SetLeft(newImage, xLoc);
-                    }
+                    //    mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
+                    //    mainCanvas.Children.Add(newImage);
+                    //    ImageSet.Add(newImage);
+                    //    Canvas.SetTop(newImage, yLoc);
+                    //    Canvas.SetLeft(newImage, xLoc);
+                    //}
+
+                    // 11/30/2015 Only one bucket and one circle shape, set them 300px apart
+                    // Place the bucket first
+                    xLoc = (int)(mainCanvas.ActualWidth / 2) - 150 - 30;
+                    yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
+
+                    BucketA.Location = new Point(xLoc, yLoc);
+
+                    newImage = new Image();
+                    newImage.Source = new BitmapImage(BucketA.ImagePath);
+                    newImage.Tag = BucketA;
+                    newImage.Width = newImage.Source.Width;
+                    newImage.Height = newImage.Source.Height;
+
+                    mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
+                    mainCanvas.Children.Add(newImage);
+                    ImageSet.Add(newImage);
+                    Canvas.SetTop(newImage, yLoc);
+                    Canvas.SetLeft(newImage, xLoc);
+
+                    // Now place the circle shape
+                    xLoc = (int)(mainCanvas.ActualWidth / 2) + 150 - 30;
+                    yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
+
+                    newImage = new Image();
+                    newImage.Source = new BitmapImage(ShapeA.ImagePath);
+                    newImage.Tag = ShapeA;
+                    newImage.Width = newImage.Source.Width;
+                    newImage.Height = newImage.Source.Height;
+
+                    mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
+                    mainCanvas.Children.Add(newImage);
+                    ImageSet.Add(newImage);
+                    Canvas.SetTop(newImage, yLoc);
+                    Canvas.SetLeft(newImage, xLoc);
 
                     moneyLB.Content = this.MoneyValue.ToString("C2");
                     Canvas.SetLeft(moneyLB, mainCanvas.ActualWidth / 2 - moneyLB.ActualWidth / 2);
@@ -376,7 +416,8 @@ namespace ShapesExperimentWPF
 
             if (image != null && mainCanvas.CaptureMouse())
             {
-                mousePosition = startMousePosition = e.GetPosition(mainCanvas);
+                //mousePosition = startMousePosition = e.GetPosition(mainCanvas);
+                mousePosition = e.GetPosition(mainCanvas);
                 draggedImage = image;
                 Panel.SetZIndex(draggedImage, 1); // in case of multiple images
             }
@@ -384,6 +425,9 @@ namespace ShapesExperimentWPF
 
         private void mainCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            var xLoc = 0;
+            var yLoc = 0;
+
             if (draggedImage != null)
             {
                 Shape shapeInfo = (Shape)draggedImage.Tag;
@@ -394,12 +438,25 @@ namespace ShapesExperimentWPF
 
                 if (checkBucket(mousePosition, shapeInfo.ShapeID))
                 {
-                    mainCanvas.Children.Remove(draggedImage);
+                    // 11/30/2015 place it back to where it was!
+                    //mainCanvas.Children.Remove(draggedImage);
+
+                    xLoc = (int)(mainCanvas.ActualWidth / 2) + 150 - 30;
+                    yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
+
+                    Canvas.SetLeft(draggedImage, xLoc);
+                    Canvas.SetTop(draggedImage, yLoc);
                 } else
                 {
                     // return this image to where it was originally
-                    Canvas.SetLeft(draggedImage, startMousePosition.X - 30);
-                    Canvas.SetTop(draggedImage, startMousePosition.Y - 30);
+                    xLoc = (int)(mainCanvas.ActualWidth / 2) + 150 - 30;
+                    yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
+
+                    Canvas.SetLeft(draggedImage, xLoc);
+                    Canvas.SetTop(draggedImage, yLoc);
+
+                    //Canvas.SetLeft(draggedImage, startMousePosition.X - 30);
+                    //Canvas.SetTop(draggedImage, startMousePosition.Y - 30);
 
                     // 10/26/15 aaaand count it as a miss
                     CurrentTrial.MissCount++;
@@ -452,21 +509,21 @@ namespace ShapesExperimentWPF
                     return true;
                 }
 
-                if (point.X >= BucketB.Location.X
-                    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
-                    && point.Y >= BucketB.Location.Y
-                    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
-                {
-                    if (id == BucketB.ShapeID)
-                    {
-                        CurrentTrial.SuccessCount++;
-                    }
-                    else
-                    {
-                        CurrentTrial.MissCount++;
-                    }
-                    return true;
-                }
+                //if (point.X >= BucketB.Location.X
+                //    && point.X <= (BucketB.Location.X + Constants.BucketWidth)
+                //    && point.Y >= BucketB.Location.Y
+                //    && point.Y <= (BucketB.Location.Y + Constants.BucketHeight))
+                //{
+                //    if (id == BucketB.ShapeID)
+                //    {
+                //        CurrentTrial.SuccessCount++;
+                //    }
+                //    else
+                //    {
+                //        CurrentTrial.MissCount++;
+                //    }
+                //    return true;
+                //}
 
                 return false;
             }
