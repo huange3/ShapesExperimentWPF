@@ -52,6 +52,7 @@ namespace ShapesExperimentWPF
         private DispatcherTimer restTimer = new DispatcherTimer();
         private DispatcherTimer phaseRestTimer = new DispatcherTimer();
         private DispatcherTimer rewardTimer = new DispatcherTimer();
+        private DispatcherTimer hitTimer = new DispatcherTimer();
 
         private Image draggedImage;
         private Point mousePosition;
@@ -126,11 +127,13 @@ namespace ShapesExperimentWPF
                 restTimer.Interval = TimeSpan.FromSeconds(1); // need 1 second intervals to show a countdown timer
                 phaseRestTimer.Interval = TimeSpan.FromSeconds(1);
                 rewardTimer.Interval = TimeSpan.FromMilliseconds(200); // get the money label to blink a few times
+                hitTimer.Interval = TimeSpan.FromMilliseconds(500);
 
                 mainTimer.Tick += mainTimer_Tick;
                 rewardTimer.Tick += rewardTimer_Tick;
                 restTimer.Tick += restTimer_Tick;
                 phaseRestTimer.Tick += phaseRestTimer_Tick;
+                hitTimer.Tick += hitTimer_Tick;
 
                 // initialize our sound player
                 soundPlayer = new Sounds();
@@ -438,14 +441,10 @@ namespace ShapesExperimentWPF
 
                 if (checkBucket(mousePosition, shapeInfo.ShapeID))
                 {
-                    // 11/30/2015 place it back to where it was!
-                    //mainCanvas.Children.Remove(draggedImage);
-
-                    xLoc = (int)(mainCanvas.ActualWidth / 2) + 150 - 30;
-                    yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
-
-                    Canvas.SetLeft(draggedImage, xLoc);
-                    Canvas.SetTop(draggedImage, yLoc);
+                    // 11/30/2015 set a delay, and then show the shape!
+                    mainCanvas.Children.Remove(draggedImage);
+                    
+                    hitTimer.Start();                  
                 } else
                 {
                     // return this image to where it was originally
@@ -652,6 +651,29 @@ namespace ShapesExperimentWPF
             }         
         }
 
+        private void hitTimer_Tick(object sender, EventArgs e)
+        {
+            var xLoc = 0;
+            var yLoc = 0;
+            Image newImage;
+
+            hitTimer.Stop();
+
+            xLoc = (int)(mainCanvas.ActualWidth / 2) + 150 - 30;
+            yLoc = (int)(mainCanvas.ActualHeight / 2) - 30;
+
+            newImage = new Image();
+            newImage.Source = new BitmapImage(ShapeA.ImagePath);
+            newImage.Tag = ShapeA;
+            newImage.Width = newImage.Source.Width;
+            newImage.Height = newImage.Source.Height;
+
+            mainCanvas.Children.Add(newImage);
+            ImageSet.Add(newImage);
+            Canvas.SetTop(newImage, yLoc);
+            Canvas.SetLeft(newImage, xLoc);
+        }
+
         private void toggleRewardTimer(bool on)
         {
             if (on)
@@ -774,6 +796,7 @@ namespace ShapesExperimentWPF
             restTimer = null;
             phaseRestTimer = null;
             rewardTimer = null;
+            hitTimer = null;
             soundPlayer = null;
         }
     }
