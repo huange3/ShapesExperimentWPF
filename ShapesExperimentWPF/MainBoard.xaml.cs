@@ -127,7 +127,7 @@ namespace ShapesExperimentWPF
                 restTimer.Interval = TimeSpan.FromSeconds(1); // need 1 second intervals to show a countdown timer
                 phaseRestTimer.Interval = TimeSpan.FromSeconds(1);
                 rewardTimer.Interval = TimeSpan.FromMilliseconds(200); // get the money label to blink a few times
-                hitTimer.Interval = TimeSpan.FromMilliseconds(500);
+                hitTimer.Interval = TimeSpan.FromMilliseconds(250);
 
                 mainTimer.Tick += mainTimer_Tick;
                 rewardTimer.Tick += rewardTimer_Tick;
