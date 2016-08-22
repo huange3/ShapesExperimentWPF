@@ -6,77 +6,73 @@
         xmlns:local="clr-namespace:ShapesExperimentWPF"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="ShapesExperimentWPF.MainWindow"
         mc:Ignorable="d"
-        Title="Shapes Experiment" Height="635" Width="383" Icon="heart_empty.ico" Loaded="Window_Loaded" ResizeMode="NoResize">
+        Title="Shapes Experiment" Height="645" Width="383" Icon="heart_empty.ico" Loaded="Window_Loaded" ResizeMode="NoResize">
     <GroupBox x:Name="groupBox" Header="Settings" Margin="10">
-        <Grid Height="435" VerticalAlignment="Top" Margin="0,0,-2,0">
+        <Grid x:Name="outerGrid" Height="480" VerticalAlignment="Top" Margin="0,0,-2,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="310"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Grid Margin="10,10,0,-118" Height="419" VerticalAlignment="Top" RenderTransformOrigin="0.424,0.478" HorizontalAlignment="Left" Width="319">
+            <Grid Margin="10,10,0,-159" Height="460" VerticalAlignment="Top" RenderTransformOrigin="0.424,0.478" HorizontalAlignment="Left" Width="320">
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
+                    <RowDefinition Height="32*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <xctk:ColorPicker x:Name="colorPickerA" Margin="10,5,0,0" Width="100" Height="22" SelectedColor="White" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                <xctk:ColorPicker x:Name="colorPickerB" HorizontalAlignment="Left" Margin="10,5,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100" Height="22" SelectedColor="White" Grid.Column="1"/>
-                <xctk:ColorPicker x:Name="colorPickerC" HorizontalAlignment="Left" Margin="10,5,0,0" Grid.Row="2" VerticalAlignment="Top" Width="100" Height="22" SelectedColor="White" Grid.Column="1"/>
+                <xctk:ColorPicker x:Name="colorPickerA" Margin="10,8,0,0" Width="100" Height="22" SelectedColor="White" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                <xctk:ColorPicker x:Name="colorPickerB" HorizontalAlignment="Left" Margin="10,8,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100" Height="22" SelectedColor="White" Grid.Column="1"/>
+                <xctk:ColorPicker x:Name="colorPickerC" HorizontalAlignment="Left" Margin="10,7,0,6" Grid.Row="2" Width="100" Height="22" SelectedColor="White" Grid.Column="1" VerticalAlignment="Center"/>
                 <Label x:Name="label" Content="Baseline Background" Margin="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                 <Label x:Name="label_Copy" Content="Phase B Background" Margin="0" Grid.Row="1" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Label x:Name="label_Copy1" Content="Phase C Background" Margin="0" Grid.Row="2" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                <Label x:Name="label_Copy1" Content="Phase C Background" Grid.Row="2" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="35"/>
                 <Label x:Name="label_Copy2" Content="Task Time (s)" Margin="0" Grid.Row="3" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                 <Label x:Name="label_Copy3" Content="Trial Rest Time (s)" Margin="0" Grid.Row="4" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                 <Label x:Name="label_Copy5" Content="Starting Amount in $" Margin="0,2,0,0" Grid.Row="6" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                 <Label x:Name="label_Copy6" Content="Reward Increment in $" Grid.Row="7" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Label x:Name="label_Copy7" Content="Baseline # of Trials" Grid.Row="8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Label x:Name="label_Copy9" Content="Phase # of Trials" Grid.Row="9" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                 <Label x:Name="label_Copy10" Content="Phase Rest Time (s)" Grid.Row="5" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Label x:Name="label_Copy8" Content="Phase B Density, w" Margin="0" Grid.Row="10" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <Label x:Name="label_Copy4" Content="Phase C Density, w" Margin="0" Grid.Row="11" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                <xctk:IntegerUpDown x:Name="trialDurationUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="15" Width="100" TextAlignment="Center" Height="20" Grid.Row="3"/>
-                <xctk:IntegerUpDown x:Name="trialRestDurationUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="15" Width="100" TextAlignment="Center" Height="20" Grid.Row="4"/>
-                <xctk:IntegerUpDown x:Name="phaseRestDurationUD" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="20" Width="100" Grid.Row="5" TextAlignment="Center" Height="20" Grid.Column="1" Value="20"/>
-                <xctk:DecimalUpDown x:Name="startingAmountUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,7,0,0" Grid.Row="6" VerticalAlignment="Top" Width="100" Value="20.00" TextAlignment="Center" Height="20"/>
-                <xctk:DecimalUpDown x:Name="rewardIncrementUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,6,0,0" Grid.Row="7" VerticalAlignment="Top" Width="100" Value="0.25" TextAlignment="Center" Height="20"/>
-                <xctk:IntegerUpDown x:Name="baselineObservationsUD" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="5" Width="100" Grid.Row="8" TextAlignment="Center" Value="5" Height="20" Grid.Column="1"/>
-                <xctk:DecimalUpDown x:Name="BDensityUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,6,0,0" Grid.Row="10" VerticalAlignment="Top" Width="100" Value="0.50" TextAlignment="Center" Height="20"/>
-                <xctk:IntegerUpDown x:Name="phaseObservationsUD" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="15" Width="100" Grid.Row="9" TextAlignment="Center" Value="15" Height="20" Grid.Column="1"/>
-                <xctk:DecimalUpDown x:Name="CDensityUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,6,0,0" Grid.Row="11" VerticalAlignment="Top" Width="100" Value="0.50" TextAlignment="Center" Height="20"/>
-                <Label x:Name="label_Copy11" Content="Observations, m" Grid.Row="12" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="0"/>
-                <xctk:IntegerUpDown x:Name="observationsUD" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" Minimum="0" Text="5" Width="100" Grid.Row="12" TextAlignment="Center" Value="5" Height="20" Grid.Column="1"/>
+                <Label x:Name="label_Copy8" Content="Phase B Density, w" Grid.Row="8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                <Label x:Name="label_Copy4" Content="Phase C Density, w" Grid.Row="9" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                <xctk:IntegerUpDown x:Name="trialDurationUD" Grid.Column="1" Margin="10,10,0,0" Minimum="0" Text="15" TextAlignment="Center" Grid.Row="3" HorizontalAlignment="Left" Width="100" Height="20" VerticalAlignment="Top"/>
+                <xctk:IntegerUpDown x:Name="trialRestDurationUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Minimum="0" Text="15" Width="100" TextAlignment="Center" Height="20" Grid.Row="4"/>
+                <xctk:IntegerUpDown x:Name="phaseRestDurationUD" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Minimum="0" Text="20" Width="100" Grid.Row="5" TextAlignment="Center" Height="20" Grid.Column="1" Value="20"/>
+                <xctk:DecimalUpDown x:Name="startingAmountUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="6" VerticalAlignment="Top" Width="100" Value="20.00" TextAlignment="Center" Height="20"/>
+                <xctk:DecimalUpDown x:Name="rewardIncrementUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="7" VerticalAlignment="Top" Width="100" Value="0.25" TextAlignment="Center" Height="20"/>
+                <xctk:DecimalUpDown x:Name="BDensityUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="8" VerticalAlignment="Top" Width="100" Value="0.50" TextAlignment="Center" Height="20"/>
+                <xctk:DecimalUpDown x:Name="CDensityUD" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="9" VerticalAlignment="Top" Width="100" Value="0.50" TextAlignment="Center" Height="20"/>
+                <Label x:Name="observationsMLbl" Content="Observations, m" Grid.Row="10" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Height="33" VerticalAlignment="Top" Margin="0,5,0,0"/>
+                <xctk:IntegerUpDown x:Name="observationsUD" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Minimum="0" Text="5" Width="100" Grid.Row="10" TextAlignment="Center" Value="5" Height="20" Grid.Column="1"/>
+                <Label x:Name="observationsMLbl_Copy" Content="Max Trials Per Phase" Grid.Row="11" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Height="36" VerticalAlignment="Top"/>
+                <xctk:IntegerUpDown x:Name="maxTrialsUD" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Minimum="0" Text="100" Width="100" Grid.Row="11" TextAlignment="Center" Value="100" Height="20" Grid.Column="1"/>
+                <Label x:Name="observationsMLbl_Copy1" Content="Total Phases" Grid.Row="12" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Height="33" VerticalAlignment="Top" Margin="0,1,0,-1"/>
+                <xctk:IntegerUpDown x:Name="totalPhasesUD" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top" Minimum="0" Text="8" Width="100" Grid.Row="12" TextAlignment="Center" Value="8" Height="20" Grid.Column="1"/>
             </Grid>
-            <Grid Height="105" Width="319" Margin="15,449,5,-243">
+            <Grid Width="319" Margin="11,484,0,-258" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Label x:Name="label1" Content="Condition Order" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Width="95" Margin="0" Height="24" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <TextBox x:Name="conditionOrderTB" HorizontalAlignment="Left" Height="22" Margin="104,6,0,0" TextWrapping="Wrap" Text="ABCBC" TextAlignment="Center" VerticalAlignment="Top" Width="120"/>
-                <Label x:Name="label1_Copy" Content="Participant ID" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="0,5" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="95"/>
-                <TextBox x:Name="participantIDTB" HorizontalAlignment="Left" Height="22" Margin="104,6,0,0" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
-                <Button x:Name="startBtn" Content="Start" Margin="114,0,0,1" Grid.Row="2" Height="32" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Width="100" Click="startBtn_Click"/>
-                <Button x:Name="generateIDBtn" Content="Generate ID" HorizontalAlignment="Left" Margin="235,6,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="generateIDBtn_Click"/>
+                <Label x:Name="label1_Copy" Content="Participant ID" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="0,8,224,0" HorizontalAlignment="Right" Width="95" Height="26" VerticalAlignment="Top"/>
+                <TextBox x:Name="participantIDTB" HorizontalAlignment="Left" Height="22" Margin="100,10,0,0" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Top" Width="120"/>
+                <Button x:Name="startBtn" Content="Start" Margin="110,0,0,10" Height="32" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Width="100" Click="startBtn_Click"/>
+                <Button x:Name="generateIDBtn" Content="Generate ID" HorizontalAlignment="Left" Margin="225,11,0,0" VerticalAlignment="Top" Width="84" Click="generateIDBtn_Click"/>
             </Grid>
         </Grid>
     </GroupBox>

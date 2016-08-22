@@ -23,6 +23,9 @@ namespace ShapesExperimentWPF
     public partial class MainWindow : Window
     {
         public List<Phase> Phases = new List<Phase>();
+        public Phase PhaseATemplate = null;
+        public Phase PhaseBTemplate = null;
+        public Phase PhaseCTemplate = null;
         public int TrialDuration = 0;
         public int TrialRestDuration = 0;
         public int PhaseRestDuration = 0;
@@ -30,6 +33,8 @@ namespace ShapesExperimentWPF
         public decimal RewardValue;
         public string ParticipantID = "";
         public int MainObservationCount = 0;
+        public int MaxTrialValue = 0;
+        public int TotalPhasesValue = 0;
 
         public MainWindow()
         {
@@ -43,20 +48,6 @@ namespace ShapesExperimentWPF
 
         private void startBtn_Click(object sender, EventArgs e)
         {
-            Regex re = new Regex(@"(^[abc]+$)/i");
-
-            if (conditionOrderTB.Text == "")
-            {
-                MessageBox.Show("Invalid condition order entered. Please try again.");
-                return;
-            }
-
-            if (re.IsMatch(conditionOrderTB.Text))
-            {
-                MessageBox.Show("Invalid condition order entered. Please try again.");
-                return;
-            }
-
             if (participantIDTB.Text == "")
             {
                 MessageBox.Show("Invalid participant ID entered. Please try again.");
@@ -79,23 +70,18 @@ namespace ShapesExperimentWPF
             ParticipantID = result;
         }
 
-        private Boolean setupPhases()
+        private bool setupPhases()
         {
-            var conditionOrderStr = "";
             var phaseObservationCount = 0;
             var baselineObservationCount = 0;
             decimal currBDensity;
-            decimal currCDensity;
-            Phase currPhase = null;
-            char currChar;
+            decimal currCDensity;    
 
             try
             {
                 // Initialize and set up phases
                 // The response index is calculated upon new object construction
                 if (Phases.Count > 0) Phases.Clear();
-
-                conditionOrderStr = conditionOrderTB.Text;
 
                 Color currAColor = (Color)colorPickerA.SelectedColor;
                 Color currBColor = (Color)colorPickerB.SelectedColor;
@@ -108,47 +94,35 @@ namespace ShapesExperimentWPF
                 RewardValue = (decimal)rewardIncrementUD.Value;
 
                 MainObservationCount = (int)observationsUD.Value;
-                baselineObservationCount = (int)baselineObservationsUD.Value;
-                phaseObservationCount = (int)phaseObservationsUD.Value;
+                baselineObservationCount = 0;
+                phaseObservationCount = 0;
                 currBDensity = (decimal)BDensityUD.Value;
                 currCDensity = (decimal)CDensityUD.Value;
+                MaxTrialValue = (int)maxTrialsUD.Value;
+                TotalPhasesValue = (int)totalPhasesUD.Value;
 
-                foreach (char c in conditionOrderStr)
-                {
-                    currChar = Char.ToUpper(c);
-
-                    if (currChar == Constants.PhaseBaseline)
-                    {
-                        currPhase = new Phase(Constants.PhaseBaseline, 
-                            currAColor, 
-                            MainObservationCount, 
-                            0, 
-                            Constants.NoRank, 
+                PhaseATemplate = new Phase(Constants.PhaseBaseline,
+                            currAColor,
+                            MainObservationCount,
+                            0,
+                            Constants.NoRank,
                             baselineObservationCount);
-                    }
 
-                    if (currChar == Constants.PhaseB)
-                    {
-                        currPhase = new Phase(Constants.PhaseB, 
-                            currBColor, 
-                            MainObservationCount, 
-                            currBDensity, 
-                            Constants.LessThan, 
+                PhaseBTemplate = new Phase(Constants.PhaseB,
+                            currBColor,
+                            MainObservationCount,
+                            currBDensity,
+                            Constants.LessThan,
                             phaseObservationCount);
-                    }
 
-                    if (currChar == Constants.PhaseC)
-                    {
-                        currPhase = new Phase(Constants.PhaseC, 
-                            currCColor, 
-                            MainObservationCount, 
-                            currCDensity, 
-                            Constants.GreaterThan, 
+                PhaseCTemplate = new Phase(Constants.PhaseC,
+                            currCColor,
+                            MainObservationCount,
+                            currCDensity,
+                            Constants.GreaterThan,
                             phaseObservationCount);
-                    }
 
-                    Phases.Add(currPhase);
-                }
+                Phases.Add(new Phase(PhaseATemplate));
 
                 return true;
             }
@@ -157,10 +131,6 @@ namespace ShapesExperimentWPF
                 MessageBox.Show("Error occurred while setting up experiment: " + e.Message);
                 return false;
                 throw e;
-            }
-            finally
-            {
-                currPhase = null;
             }
         }
 
@@ -180,6 +150,11 @@ namespace ShapesExperimentWPF
                 newBoard.RewardValue = this.RewardValue;
                 newBoard.ParticipantID = this.ParticipantID;
                 newBoard.MainObservationCount = this.MainObservationCount;
+                newBoard.PhaseATemplate = this.PhaseATemplate;
+                newBoard.PhaseBTemplate = this.PhaseBTemplate;
+                newBoard.PhaseCTemplate = this.PhaseCTemplate;
+                newBoard.MaxTrialValue = this.MaxTrialValue;
+                newBoard.TotalPhasesValue = this.TotalPhasesValue;
 
                 newBoard.Show();
             }
@@ -211,10 +186,18 @@ namespace ShapesExperimentWPF
 
                 filePath = String.Format("{0}{1}-{2}.txt", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
 
+                // state our limiters
+                newLine += "Max Trial Value,Total Phases\n";
+                newLine += String.Format("{0},{1}{2}{3}",
+                    MaxTrialValue,
+                    TotalPhasesValue,
+                    Environment.NewLine,
+                    Environment.NewLine);
+
                 foreach (Phase p in Phases)
                 {
                     // start with our phase
-                    newLine = "Phase,Background Color,Observations,Density,Rank Type,Trial Time,Trial Rest Time,Phase Rest Time,Number of Trials\n";
+                    newLine += "Phase,Background Color,Observations,Density,Rank Type,Trial Time,Trial Rest Time,Phase Rest Time,Number of Trials\n";
                     newLine += String.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8}{9}{10}",
                         p.Label,
                         p.BackgroundColor.ToString(),
@@ -242,6 +225,9 @@ namespace ShapesExperimentWPF
                     }
 
                     newLine += "\n";
+                    newLine += "Celeration Value\n";
+                    newLine += p.CelerationValue + "\n\n";
+
                     builder.Append(newLine);
                 }
 

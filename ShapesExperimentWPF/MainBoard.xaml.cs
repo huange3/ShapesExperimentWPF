@@ -23,6 +23,9 @@ namespace ShapesExperimentWPF
     {
         public List<Phase> Phases = new List<Phase>();
         public Queue<Phase> PhaseQueue = null;
+        public Phase PhaseATemplate = null;
+        public Phase PhaseBTemplate = null;
+        public Phase PhaseCTemplate = null;
         private Phase CurrentPhase = null;
         private Trial CurrentTrial = null;
         private List<Shape> BaselineShapes = null;
@@ -42,6 +45,8 @@ namespace ShapesExperimentWPF
         public int PhaseRestDuration = 0;
         public decimal MoneyValue;
         public decimal RewardValue;
+        public int MaxTrialValue = 0;
+        public int TotalPhasesValue = 0;
         private int CurrentTrialCount = 0;
         private int CurrentMillis = 0;      
         private bool BlinkOn = true;
@@ -95,32 +100,11 @@ namespace ShapesExperimentWPF
             {
                 BaselineShapes = new List<Shape>();
 
-                //BaselineShapes.Add(new Shape(1, "heart-01.png"));
-                //BaselineShapes.Add(new Shape(2, "diamond-01.png"));
-
                 BaselineShapes.Add(new Shape(1, "circle.png"));
 
                 TrialShapes = new List<Shape>();
 
-                //TrialShapes.Add(new Shape(3, "sun-02.png"));
-                //TrialShapes.Add(new Shape(4, "moon-02.png"));
-
                 TrialShapes.Add(new Shape(1, "circle.png"));
-
-                // create ourselves a board that we can shuffle to drive 
-                // the drawBoard() function
-                // X & Y are buckets
-                // A is shape #1, B is shape #2
-                //for (var i = 0; i < 64; i++)
-                //{
-                //    if (i == 0) SkeletonBoard.Add(Constants.BucketA);
-
-                //    else if (i == 1) SkeletonBoard.Add(Constants.BucketB);
-
-                //    else if (i >= 2 && i <= 32) SkeletonBoard.Add(Constants.ShapeA);
-
-                //    else SkeletonBoard.Add(Constants.ShapeB);
-                //}
 
                 // set up our timers
                 mainTimer.Interval = TimeSpan.FromSeconds(TrialDuration);
@@ -156,7 +140,8 @@ namespace ShapesExperimentWPF
                     return false;
                 }
 
-                if (PhaseQueue.Count == 0)
+                // End our experiment!!
+                if (PhaseQueue.Count == 0 || Phases.Count == TotalPhasesValue)
                 {
                     // find our main window and call the outputData() function
                     var windows = Application.Current.Windows.OfType<MainWindow>();
@@ -176,27 +161,9 @@ namespace ShapesExperimentWPF
 
                 CurrentPhase = PhaseQueue.Dequeue();
 
-                //if (CurrentPhase.Label == Constants.PhaseBaseline)
-                //{
-                //    ShapeA = BaselineShapes[0];
-                //    ShapeB = BaselineShapes[1];
-                //}
-                //else if (CurrentPhase.Label == Constants.PhaseB)
-                //{
-                //    ShapeA = TrialShapes[0];
-                //    ShapeB = TrialShapes[1];
-                //}
-                //else if (CurrentPhase.Label == Constants.PhaseC)
-                //{
-                //    ShapeA = TrialShapes[0];
-                //    ShapeB = TrialShapes[1];
-                //}
-
-                // 11/30/2015 Changed to one bucket, one circle shape
                 ShapeA = BaselineShapes[0];
 
                 BucketA = findBucket(ShapeA.ShapeID);
-                //BucketB = findBucket(ShapeB.ShapeID);
 
                 runTrial();
 
@@ -215,22 +182,81 @@ namespace ShapesExperimentWPF
         {
             try
             {
-                // If we've already hit our trial limit, then kick them over to the next phase.
-                if (CurrentTrialCount == CurrentPhase.TrialCount)
-                {
-                    CurrentTrialCount = 0;
-                    Phases.Add(CurrentPhase);
-                    runPhase();
-                }
-                else
-                {
-                    drawBoard();
+                // Rules:
+                // Phase A: ends when 5 most recent timings have stability OR celeration rate of x1
+                // Phase B: ends when 5 most recent timings have stability AND celeration rate of % VALUE
+                // Phase C: ends when 5 most recent timings have stability AND celeration rate of x VALUE
+                double celerationVal = 0.0;
+                bool endPhase = false;
 
-                    CurrentTrial = new Trial();
-                    CurrentTrialCount++;
+                // 
+                if (CurrentTrialCount >= 5)
+                {
+                    if (CurrentPhase.Label == 'A')
+                    {
+                        celerationVal = calculateCelerationValue();
 
-                    mainTimer.Start();
+                        if (celerationVal >= 1 || checkStability())
+                        {
+                            // Phase A ends! Decide on where to send them next...
+                            // Negative celeration value goes to Phase C
+                            // Positive celeration value goes to Phase B
+                            endPhase = true;
+                            CurrentTrialCount = 0;
+                            CurrentPhase.CelerationValue = celerationVal;
+                            Phases.Add(CurrentPhase);
+
+                            if (celerationVal < 0)
+                            {
+                                PhaseQueue.Enqueue(new Phase(PhaseCTemplate));
+                            } else
+                            {
+                                PhaseQueue.Enqueue(new Phase(PhaseBTemplate));
+                            }
+                        }
+                    } else if (CurrentPhase.Label == 'B')
+                    {
+                        celerationVal = calculateCelerationValue();
+
+                        if (celerationVal < 0 && checkStability())
+                        {
+                            endPhase = true;
+                            CurrentTrialCount = 0;
+                            CurrentPhase.CelerationValue = celerationVal;
+                            Phases.Add(CurrentPhase);
+
+                            PhaseQueue.Enqueue(new Phase(PhaseATemplate));
+                        }
+                    } else if (CurrentPhase.Label == 'C')
+                    {
+                        celerationVal = calculateCelerationValue();
+
+                        if (celerationVal > 0 && checkStability())
+                        {
+                            endPhase = true;
+                            CurrentTrialCount = 0;
+                            CurrentPhase.CelerationValue = celerationVal;
+                            Phases.Add(CurrentPhase);
+
+                            PhaseQueue.Enqueue(new Phase(PhaseATemplate));
+                        }
+                    }
+
+                    celerationLB.Content = celerationVal;
+
+                    if (endPhase || CurrentTrialCount >= MaxTrialValue)
+                    {
+                        runPhase();
+                        return;
+                    }
                 }
+
+                drawBoard();
+
+                CurrentTrial = new Trial();
+                CurrentTrialCount++;
+
+                mainTimer.Start();
             }
             catch (Exception e)
             {
@@ -239,10 +265,148 @@ namespace ShapesExperimentWPF
             }
         }
 
-        public Boolean drawBoard()
+        private bool checkStability()
         {
-            Uri currImage = null;
-            Object currTag = null;
+            try
+            {
+                // Get the latest 5 timings of this phase and order their 
+                // success count from least to greatest, find the median.
+                // Check if the other 4 values fall within 20% of this median.
+                // If yes, then stability is reached - return true.
+                // Else, return false.
+                List<int> currCounts = new List<int>();
+
+                for (int i = 1; i <= 5; i++)
+                {
+                    currCounts.Add(CurrentPhase.Trials[CurrentPhase.Trials.Count - i].SuccessCount);
+                }
+
+                currCounts.OrderBy(x => x);
+
+                int halfIndex = 2; // we have 5 timings, so median is at zero-based index 2
+
+                int median = currCounts[halfIndex];
+                int variance = (int)Math.Round(median * 0.20);
+                bool isStable = false;
+
+                currCounts.Remove(median);
+
+                foreach (int x in currCounts)
+                {
+                    if (x >= (median - variance) && x <= (median + variance))
+                    {
+                        isStable = true;
+                    } else
+                    {
+                        isStable = false;
+                        break;
+                    }
+                }
+
+                return isStable;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred while checking stability: " + e.Message);
+                throw e;
+            }
+        }
+
+        private double calculateCelerationValue()
+        {
+            try
+            {
+                // First step: Find the linear regression of the logs
+                // Get the latest 5 timings of this phase.
+                // x = [1, 2, 3, 4, 5]
+                // y = [successCount1, successCount2, successCount3, ... ]
+                List<int> currCounts = new List<int>();
+
+                for (int i = 5; i > 0; i--)
+                {
+                    currCounts.Add(CurrentPhase.Trials[CurrentPhase.Trials.Count - i].SuccessCount);
+                }
+
+                int[] x = { 1, 2, 3, 4, 5 };
+
+                // Get our list of Log Y values
+                List<double> yLogs = new List<double>();
+
+                foreach (int i in currCounts)
+                {
+                    yLogs.Add(Math.Log(i));
+                }
+
+                // Calculate sigma XY
+                double sigXY = 0.0;
+
+                for (int i = 0; i < 5; i++)
+                {
+                    sigXY += (x[i] * yLogs[i]);
+                }
+
+                // Calculate N sigma XY
+                double nSigXY = 5 * sigXY;
+
+                // Calculate sum of X
+                int sumX = 15;
+
+                // Calculate sum of Y logs
+                double sumYLogs = 0.0;
+
+                foreach (double i in yLogs)
+                {
+                    sumYLogs += i;
+                }
+
+                // Calculate N sig XY - (sig X * sig Y Logs)
+                double slope = nSigXY - (sumX * sumYLogs);
+
+                // Calculate N sigma X squared
+                int nSigXSquared = 0;
+
+                foreach (int i in x)
+                {
+                    nSigXSquared += (i * i);
+                }
+
+                nSigXSquared = 5 * nSigXSquared;
+
+                // Calculate the final slope value
+                slope = slope / (nSigXSquared - (sumX * sumX));
+
+                // Now onto the Y intercept
+                double yIntercept = (sumYLogs - (slope * sumX)) / 5;
+
+                // Second step: Calculate the actual celeration value
+                // Will be using positive numbers for x VALUE celeration,
+                // negative numbers for % VALUE celeration for convenience sake
+                double yVal = slope * x[0] + yIntercept;
+                double startFreq = Math.Pow(10, yVal);
+
+                yVal = slope * x[4] + yIntercept;
+                double endFreq = Math.Pow(10, yVal);
+
+                double celerationVal = Math.Pow(endFreq / startFreq, 0.2);
+
+                celerationVal = Math.Pow(celerationVal, 7);
+
+                if (celerationVal < 1)
+                {
+                    celerationVal = (1 / celerationVal) * -1; // making it negative instead of % VALUE for easier parsing
+                }
+
+                return Math.Round(celerationVal, 3); // phew, done!
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error occurred while calculating celeration value: " + e.Message);
+                throw e;
+            }
+        }
+
+        public bool drawBoard()
+        {
             Image newImage;
 
             int xLoc = 0;
@@ -261,67 +425,6 @@ namespace ShapesExperimentWPF
                             mainCanvas.Children.Remove(i);
                         }
                     }
-
-                    // shuffle our skeleton board and then draw the controls
-                    // onto the board
-                    //SkeletonBoard.Shuffle();
-
-                    //for (var i = 0; i < SkeletonBoard.Count; i++)
-                    //{
-                    //    if (i == 0)
-                    //    {
-                    //        xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4;
-                    //        yLoc = (int)mainCanvas.ActualHeight / 2 - 64 * 4;
-                    //    }
-                    //    else if (i > 0 && i % 8 == 0)
-                    //    {
-                    //        xLoc = (int)mainCanvas.ActualWidth / 2 - 65 * 4; ;
-                    //        yLoc += 65;
-                    //    }
-                    //    else if (i > 0)
-                    //    {
-                    //        xLoc += 65;
-                    //    }
-
-                    //    // if these shapes are buckets, remember to save their locations
-                    //    // assign tags to all objects so we can check their shape IDs
-                    //    switch (SkeletonBoard[i])
-                    //    {
-                    //        case Constants.BucketA:
-                    //            currImage = BucketA.ImagePath;
-                    //            BucketA.Location = new Point(xLoc, yLoc);
-                    //            currTag = BucketA;
-                    //            break;
-                    //        case Constants.BucketB:
-                    //            currImage = BucketB.ImagePath;                               
-                    //            BucketB.Location = new Point(xLoc, yLoc);
-                    //            currTag = BucketB;
-                    //            break;
-                    //        case Constants.ShapeA:
-                    //            currImage = ShapeA.ImagePath;
-                    //            currTag = ShapeA;
-                    //            break;
-                    //        case Constants.ShapeB:
-                    //            currImage = ShapeB.ImagePath;
-                    //            currTag = ShapeB;
-                    //            break;
-                    //        default:
-                    //            break;
-                    //    }
-
-                    //    // create our new image control and add it to the main canvas
-                    //    newImage = new Image();
-                    //    newImage.Source = new BitmapImage(currImage);
-                    //    newImage.Tag = currTag;
-                    //    newImage.Width = newImage.Source.Width;
-                    //    newImage.Height = newImage.Source.Height;
-
-                    //    mainCanvas.Background = new SolidColorBrush(CurrentPhase.BackgroundColor);
-                    //    mainCanvas.Children.Add(newImage);
-                    //    ImageSet.Add(newImage);
-                    //    Canvas.SetTop(newImage, yLoc);
-                    //    Canvas.SetLeft(newImage, xLoc);
-                    //}
 
                     // 11/30/2015 Only one bucket and one circle shape, set them 300px apart
                     // Place the bucket first
@@ -377,24 +480,6 @@ namespace ShapesExperimentWPF
         {
             string filePath = "";
 
-            //switch (id)
-            //{
-            //    case 1:
-            //        filePath = "bucket-heart.png";
-            //        break;
-            //    case 2:
-            //        filePath = "bucket-diamond.png";
-            //        break;
-            //    case 3:
-            //        filePath = "bucket-sun.png";
-            //        break;
-            //    case 4:
-            //        filePath = "bucket-moon.png";
-            //        break;
-            //    default:
-            //        filePath = "";
-            //        break;
-            //}
             filePath = "bucket-empty.png";
 
             return new Shape(id, filePath, true);
@@ -419,7 +504,6 @@ namespace ShapesExperimentWPF
 
             if (image != null && mainCanvas.CaptureMouse())
             {
-                //mousePosition = startMousePosition = e.GetPosition(mainCanvas);
                 mousePosition = e.GetPosition(mainCanvas);
                 draggedImage = image;
                 Panel.SetZIndex(draggedImage, 1); // in case of multiple images
@@ -453,9 +537,6 @@ namespace ShapesExperimentWPF
 
                     Canvas.SetLeft(draggedImage, xLoc);
                     Canvas.SetTop(draggedImage, yLoc);
-
-                    //Canvas.SetLeft(draggedImage, startMousePosition.X - 30);
-                    //Canvas.SetTop(draggedImage, startMousePosition.Y - 30);
 
                     // 10/26/15 aaaand count it as a miss
                     CurrentTrial.MissCount++;
