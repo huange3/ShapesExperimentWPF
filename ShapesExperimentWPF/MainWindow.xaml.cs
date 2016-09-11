@@ -32,7 +32,9 @@ namespace ShapesExperimentWPF
         public decimal MoneyValue;
         public decimal RewardValue;
         public string ParticipantID = "";
-        public int MainObservationCount = 0;
+        public int BaselineObservationValue = 0;
+        public int BObservationValue = 0;
+        public int CObservationValue = 0;
         public int MaxTrialValue = 0;
         public int TotalPhasesValue = 0;
 
@@ -93,7 +95,9 @@ namespace ShapesExperimentWPF
                 MoneyValue = (decimal)startingAmountUD.Value;
                 RewardValue = (decimal)rewardIncrementUD.Value;
 
-                MainObservationCount = (int)observationsUD.Value;
+                BaselineObservationValue = (int)observationsBaselineUD.Value;
+                BObservationValue = (int)observationsBUD.Value;
+                CObservationValue = (int)observationsCUD.Value;
                 baselineObservationCount = 0;
                 phaseObservationCount = 0;
                 currBDensity = (decimal)BDensityUD.Value;
@@ -103,21 +107,21 @@ namespace ShapesExperimentWPF
 
                 PhaseATemplate = new Phase(Constants.PhaseBaseline,
                             currAColor,
-                            MainObservationCount,
+                            BaselineObservationValue,
                             0,
                             Constants.NoRank,
                             baselineObservationCount);
 
                 PhaseBTemplate = new Phase(Constants.PhaseB,
                             currBColor,
-                            MainObservationCount,
+                            BObservationValue,
                             currBDensity,
                             Constants.LessThan,
                             phaseObservationCount);
 
                 PhaseCTemplate = new Phase(Constants.PhaseC,
                             currCColor,
-                            MainObservationCount,
+                            CObservationValue,
                             currCDensity,
                             Constants.GreaterThan,
                             phaseObservationCount);
@@ -149,7 +153,6 @@ namespace ShapesExperimentWPF
                 newBoard.MoneyValue = this.MoneyValue;
                 newBoard.RewardValue = this.RewardValue;
                 newBoard.ParticipantID = this.ParticipantID;
-                newBoard.MainObservationCount = this.MainObservationCount;
                 newBoard.PhaseATemplate = this.PhaseATemplate;
                 newBoard.PhaseBTemplate = this.PhaseBTemplate;
                 newBoard.PhaseCTemplate = this.PhaseCTemplate;
@@ -184,7 +187,7 @@ namespace ShapesExperimentWPF
                     Directory.CreateDirectory("./Data");
                 }
 
-                filePath = String.Format("{0}{1}-{2}.txt", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
+                filePath = String.Format("{0}{1}-{2}.csv", "./Data/", DateTime.Now.ToString("yyyyMMdd"), ParticipantID);
 
                 // state our limiters
                 newLine += "Max Trial Value,Total Phases\n";
@@ -226,10 +229,10 @@ namespace ShapesExperimentWPF
 
                     newLine += "\n";
                     newLine += "Celeration Value\n";
-                    newLine += p.CelerationValue + "\n\n";
-
-                    builder.Append(newLine);
+                    newLine += p.CelerationValue + "\n\n";           
                 }
+
+                builder.Append(newLine);
 
                 File.WriteAllText(filePath, builder.ToString());
             }

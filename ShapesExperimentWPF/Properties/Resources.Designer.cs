@@ -63,9 +63,9 @@ namespace ShapesExperimentWPF.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
         /// </summary>
-        internal static System.IO.UnmanagedMemoryStream cashRegister {
+        internal static System.IO.UnmanagedMemoryStream CashRegister {
             get {
-                return ResourceManager.GetStream("cashRegister", resourceCulture);
+                return ResourceManager.GetStream("CashRegister", resourceCulture);
             }
         }
         

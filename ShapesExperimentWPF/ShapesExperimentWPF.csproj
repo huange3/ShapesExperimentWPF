@@ -103,7 +103,6 @@
       <DependentUpon>MainBoard.xaml</DependentUpon>
     </Compile>
     <Compile Include="Shape.cs" />
-    <Compile Include="Sounds.cs" />
     <Compile Include="Trial.cs" />
     <Page Include="MainBoard.xaml">
       <SubType>Designer</SubType>
@@ -159,9 +158,6 @@
     <Folder Include="Data\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\cashRegister.wav" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\toneHit.wav" />
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +206,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CashRegister.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
