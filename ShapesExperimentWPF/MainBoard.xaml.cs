@@ -75,7 +75,22 @@ namespace ShapesExperimentWPF
         {
             if (e.Key == Key.Escape)
             {
+                // save our current phase/trial data so we can output it
+                CurrentPhase.Trials.Add(CurrentTrial);
+                Phases.Add(CurrentPhase);
+
+                // find our main window and call the outputData() function
+                var windows = Application.Current.Windows.OfType<MainWindow>();
+
+                if (windows.Count() > 0)
+                {
+                    var mainWindow = windows.First();
+                    mainWindow.Phases = this.Phases;
+                    mainWindow.outputData();
+                }
+
                 this.Close();
+                MessageBox.Show("Experiment completed! Thank you for participating!");
             }
         }
 
@@ -208,7 +223,7 @@ namespace ShapesExperimentWPF
         {
             try
             {
-                // Get the latest N timings of this phase and order their 
+                // Get the latest 5 timings of this phase and order their 
                 // success count from least to greatest, find the median.
                 // Check if the other values fall within 20% of this median.
                 // If yes, then stability is reached - return true.
@@ -216,7 +231,7 @@ namespace ShapesExperimentWPF
                 // OR if they score 0 for all 5 timings
                 List<int> currCounts = new List<int>();
 
-                for (int i = 1; i <= CurrentPhase.Observations; i++)
+                for (int i = 1; i <= 5; i++)
                 {
                     currCounts.Add(CurrentPhase.Trials[CurrentPhase.Trials.Count - i].SuccessCount);
                 }
@@ -233,10 +248,10 @@ namespace ShapesExperimentWPF
 
                 ////////////////////////////////////////
 
-                currCounts.OrderBy(x => x);
+                currCounts.Sort();
 
                 double median = 0.0;
-                int variance = 0;
+                double variance = 0.0;
                 bool isStable = false;
 
                 // check if it's an even number
@@ -248,7 +263,7 @@ namespace ShapesExperimentWPF
                     median = currCounts[(int)Math.Floor((decimal)(currCounts.Count / 2))];
                 }
 
-                variance = (int)Math.Round(median * 0.20);
+                variance = median * 0.20;
 
                 foreach (int x in currCounts)
                 {
@@ -276,19 +291,19 @@ namespace ShapesExperimentWPF
             try
             {
                 // First step: Find the linear regression of the logs
-                // Get the latest N timings of this phase.
-                // x = [1, 2, 3, 4, 5, ... ]
+                // Get the latest 5 timings of this phase.
+                // x = [1, 2, 3, 4, 5 ]
                 // y = [successCount1, successCount2, successCount3, ... ]
                 List<int> currCounts = new List<int>();
                 List<int> x = new List<int>();
                 List<double> yLogs = new List<double>();
 
-                for (int i = CurrentPhase.Observations; i > 0; i--)
+                for (int i = 5; i > 0; i--)
                 {
                     currCounts.Add(CurrentPhase.Trials[CurrentPhase.Trials.Count - i].SuccessCount);
                 }
 
-                for (int i = 1; i <= CurrentPhase.Observations; i++)
+                for (int i = 1; i <= 5; i++)
                 {
                     x.Add(i);
                 }
@@ -302,13 +317,13 @@ namespace ShapesExperimentWPF
                 // Calculate sigma XY
                 double sigXY = 0.0;
 
-                for (int i = 0; i < CurrentPhase.Observations; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     sigXY += Math.Round((x[i] * yLogs[i]), 2);
                 }
 
                 // Calculate N sigma XY
-                double nSigXY = CurrentPhase.Observations * sigXY;
+                double nSigXY = 5 * sigXY;
 
                 // Calculate sum of X
                 int sumX = 0;
@@ -337,13 +352,13 @@ namespace ShapesExperimentWPF
                     nSigXSquared += (i * i);
                 }
 
-                nSigXSquared = CurrentPhase.Observations * nSigXSquared;
+                nSigXSquared = 5 * nSigXSquared;
 
                 // Calculate the final slope value
                 slope = Math.Round(slope / (nSigXSquared - (sumX * sumX)), 2);
 
                 // Now onto the Y intercept
-                double yIntercept = Math.Round((sumYLogs - (slope * sumX)) / CurrentPhase.Observations, 2);
+                double yIntercept = Math.Round((sumYLogs - (slope * sumX)) / 5, 2);
 
                 // Second step: Calculate the actual celeration value
                 // Will be using positive numbers for x VALUE celeration,
@@ -351,7 +366,7 @@ namespace ShapesExperimentWPF
                 double yVal = Math.Round(slope * x[0] + yIntercept, 2);
                 double startFreq = Math.Round(Math.Pow(10, yVal), 2);
 
-                yVal = Math.Round(slope * x[CurrentPhase.Observations - 1] + yIntercept, 2);
+                yVal = Math.Round(slope * x[5 - 1] + yIntercept, 2);
                 double endFreq = Math.Round(Math.Pow(10, yVal), 2);
 
                 double celerationVal = Math.Round(Math.Pow(endFreq / startFreq, 0.2), 2);
@@ -676,9 +691,9 @@ namespace ShapesExperimentWPF
 
                 // Determine our phase order and trial stability
                 // Rules:
-                // Phase A: ends when N most recent timings have stability OR celeration rate of x1
-                // Phase B: ends when N most recent timings have stability AND celeration rate of % VALUE
-                // Phase C: ends when N most recent timings have stability AND celeration rate of x VALUE
+                // Phase A: ends when 5 most recent timings have stability OR celeration rate of x1
+                // Phase B: ends when 5 most recent timings have stability AND celeration rate of % VALUE
+                // Phase C: ends when 5 most recent timings have stability AND celeration rate of x VALUE
                 double celerationVal = 0.0;
 
                 // ////////////////////////////////////////////////////////////////
@@ -688,7 +703,7 @@ namespace ShapesExperimentWPF
                     {
                         celerationVal = calculateCelerationValue();
 
-                        if (celerationVal >= 1 || checkStability())
+                        if (celerationVal == 1 || checkStability())
                         {
                             // Phase A ends! Decide on where to send them next...
                             // Negative celeration value goes to Phase C
@@ -717,9 +732,7 @@ namespace ShapesExperimentWPF
 
                             CurrentPhase.CelerationValue = celerationVal;
 
-                            PhaseQueue.Enqueue(new Phase(PhaseATemplate));
-                            // Make sure to clear our Observation list for the new baseline
-                            ObservationList.Clear();
+                            PhaseQueue.Enqueue(new Phase(PhaseCTemplate));
                         }
                     }
                     else if (CurrentPhase.Label == 'C')
@@ -732,9 +745,7 @@ namespace ShapesExperimentWPF
 
                             CurrentPhase.CelerationValue = celerationVal;
 
-                            PhaseQueue.Enqueue(new Phase(PhaseATemplate));
-                            // Make sure to clear our Observation list for the new baseline
-                            ObservationList.Clear();
+                            PhaseQueue.Enqueue(new Phase(PhaseBTemplate));
                         }
                     }
 
