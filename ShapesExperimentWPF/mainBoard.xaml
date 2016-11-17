@@ -14,7 +14,7 @@
             <Canvas x:Name="restCanvas" Height="500" Width="500" Background="Black" Visibility="Hidden" Panel.ZIndex="1">
                 <Label x:Name="countDownLB" Content="20" Canvas.Left="227" Canvas.Top="202" FontFamily="Segoe WP Black" FontSize="40" Foreground="White" Visibility="Hidden"/>
             </Canvas>
-            <Label x:Name="celerationLB" Content="CV:" FontFamily="Segoe WP Black" FontSize="30" Height="50" Canvas.Left="350" Canvas.Top="10" Panel.ZIndex="2" Background="White" Visibility="Visible"/>
+            <Label x:Name="celerationLB" Content="CV:" FontFamily="Segoe WP Black" FontSize="30" Height="50" Canvas.Left="350" Canvas.Top="10" Panel.ZIndex="2" Background="White" Visibility="Hidden"/>
         </Canvas>
     </Grid>
 
