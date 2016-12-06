@@ -219,6 +219,27 @@ namespace ShapesExperimentWPF
             }
         }
 
+        private bool checkZeroSum()
+        {
+            List<int> currCounts = new List<int>();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                currCounts.Add(CurrentPhase.Trials[CurrentPhase.Trials.Count - i].SuccessCount);
+            }
+
+            int sum = 0;
+
+            for (int i = 0; i < currCounts.Count; i++)
+            {
+                sum += currCounts[i];
+            }
+
+            if (sum == 0) return true;
+
+            return false;
+        }
+
         private bool checkStability()
         {
             try
@@ -693,7 +714,9 @@ namespace ShapesExperimentWPF
                 // Rules:
                 // Phase A: ends when 5 most recent timings have stability OR celeration rate of x1
                 // Phase B: ends when 5 most recent timings have stability AND celeration rate of % VALUE
+                // OR 5 consecutive timings of 0
                 // Phase C: ends when 5 most recent timings have stability AND celeration rate of x VALUE
+                // OR 5 consecutive timings of 0
                 double celerationVal = 0.0;
 
                 // ////////////////////////////////////////////////////////////////
@@ -726,7 +749,7 @@ namespace ShapesExperimentWPF
                     {
                         celerationVal = calculateCelerationValue();
 
-                        if (celerationVal < 0 && checkStability())
+                        if ((celerationVal < 0 && checkStability()) || checkZeroSum())
                         {
                             endPhase = true;
 
@@ -739,7 +762,7 @@ namespace ShapesExperimentWPF
                     {
                         celerationVal = calculateCelerationValue();
 
-                        if (celerationVal > 0 && checkStability())
+                        if ((celerationVal > 0 && checkStability()) || checkZeroSum())
                         {
                             endPhase = true;
 
