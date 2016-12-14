@@ -659,9 +659,17 @@ namespace ShapesExperimentWPF
                 // either greater than or less than the response index
                 // k = (m + 1)(1 - w)
 
+                // add our latest observation value so we can use it for subsequent trials
+                // but keep the list count at our main m value
+                if (ObservationList.Count == CurrentPhase.Observations)
+                {
+                    ObservationList.RemoveAt(0);
+                }
+
+                ObservationList.Add(CurrentTrial.SuccessCount);
+
                 if (CurrentPhase.Label == Constants.PhaseBaseline)
                 {
-                    ObservationList.Add(CurrentTrial.SuccessCount);
                     CurrentPhase.Trials.Add(CurrentTrial);
                     RewardOn = false;
                 } else
@@ -691,15 +699,6 @@ namespace ShapesExperimentWPF
                         }
                         else RewardOn = false;
                     }
-
-                    // add our latest observation value so we can use it for subsequent trials
-                    // but keep the list count at our main m value
-                    if (ObservationList.Count == CurrentPhase.Observations)
-                    {
-                        ObservationList.RemoveAt(0);
-                    }
-
-                    ObservationList.Add(CurrentTrial.SuccessCount);
 
                     // save our current trial data and add it to our current phase's trial list
                     CurrentTrial.ResponseValue = successValues[responseIndex - 1];
