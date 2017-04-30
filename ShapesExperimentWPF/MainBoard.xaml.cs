@@ -34,9 +34,7 @@ namespace ShapesExperimentWPF
         private List<char> SkeletonBoard = new List<char>(64);
         private List<Image> ImageSet = new List<Image>();
         private Shape ShapeA = null;
-        private Shape ShapeB = null;
         private Shape BucketA = null;
-        private Shape BucketB = null;
         private List<int> ObservationList = new List<int>();
 
         public string ParticipantID = "";
@@ -61,7 +59,6 @@ namespace ShapesExperimentWPF
 
         private Image draggedImage;
         private Point mousePosition;
-        private Point startMousePosition;
         private SoundPlayer RewardPlayer = null;
         private SoundPlayer NoRewardPlayer = null;
         private bool endPhase = false;
@@ -332,7 +329,7 @@ namespace ShapesExperimentWPF
                 // Get our list of Log Y values
                 foreach (int i in currCounts)
                 {
-                    yLogs.Add(Math.Round(Math.Log10(i), 2));
+                    yLogs.Add(Math.Log10(i));
                 }
 
                 // Calculate sigma XY
@@ -340,7 +337,7 @@ namespace ShapesExperimentWPF
 
                 for (int i = 0; i < 5; i++)
                 {
-                    sigXY += Math.Round((x[i] * yLogs[i]), 2);
+                    sigXY += (x[i] * yLogs[i]);
                 }
 
                 // Calculate N sigma XY
@@ -363,7 +360,7 @@ namespace ShapesExperimentWPF
                 }
 
                 // Calculate N sig XY - (sig X * sig Y Logs)
-                double slope = Math.Round(nSigXY - (sumX * sumYLogs), 2);
+                double slope = nSigXY - (sumX * sumYLogs);
 
                 // Calculate N sigma X squared
                 int nSigXSquared = 0;
@@ -376,23 +373,23 @@ namespace ShapesExperimentWPF
                 nSigXSquared = 5 * nSigXSquared;
 
                 // Calculate the final slope value
-                slope = Math.Round(slope / (nSigXSquared - (sumX * sumX)), 2);
+                slope = slope / (nSigXSquared - (sumX * sumX));
 
                 // Now onto the Y intercept
-                double yIntercept = Math.Round((sumYLogs - (slope * sumX)) / 5, 2);
+                double yIntercept = (sumYLogs - (slope * sumX)) / 5;
 
                 // Second step: Calculate the actual celeration value
                 // Will be using positive numbers for x VALUE celeration,
                 // negative numbers for % VALUE celeration for convenience sake
-                double yVal = Math.Round(slope * x[0] + yIntercept, 2);
-                double startFreq = Math.Round(Math.Pow(10, yVal), 2);
+                double yVal = slope * x[0] + yIntercept;
+                double startFreq = Math.Pow(10, yVal);
 
-                yVal = Math.Round(slope * x[5 - 1] + yIntercept, 2);
-                double endFreq = Math.Round(Math.Pow(10, yVal), 2);
+                yVal = slope * x[5 - 1] + yIntercept;
+                double endFreq = Math.Pow(10, yVal);
 
-                double celerationVal = Math.Round(Math.Pow(endFreq / startFreq, 0.2), 2);
+                double celerationVal = Math.Pow(endFreq / startFreq, 0.2);
 
-                celerationVal = Math.Round(Math.Pow(celerationVal, 7), 2);
+                celerationVal = Math.Pow(celerationVal, 7);
 
                 if (celerationVal < 1)
                 {
@@ -641,7 +638,7 @@ namespace ShapesExperimentWPF
 
         private void calculateResponse()
         {
-            List<int> successValues = null;
+            List<int> successValues = new List<int>();
             int responseIndex = 0;
 
             try
@@ -661,11 +658,15 @@ namespace ShapesExperimentWPF
 
                 // add our latest observation value so we can use it for subsequent trials
                 // but keep the list count at our main m value
-                if (ObservationList.Count == CurrentPhase.Observations)
-                {
-                    ObservationList.RemoveAt(0);
-                }
+                //if (ObservationList.Count >= CurrentPhase.Observations)
+                //{
+                //    for (int i = 0; i <= (ObservationList.Count - CurrentPhase.Observations); i++)
+                //    {
+                //        ObservationList.RemoveAt(i);
+                //    }
+                //}
 
+                // Removing the observation list limit, just keep stacking it up!
                 ObservationList.Add(CurrentTrial.SuccessCount);
 
                 if (CurrentPhase.Label == Constants.PhaseBaseline)
@@ -674,15 +675,24 @@ namespace ShapesExperimentWPF
                     RewardOn = false;
                 } else
                 {
+                    // Need to consider the scenario where we're switching from 
+                    // a phase with a low m to a phase with high m
+                    // Example: Phase B m=5 --> Phase C m=20
+
                     responseIndex = (int)Math.Floor((CurrentPhase.Observations + 1) * (1 - CurrentPhase.Density));
 
-                    successValues = (from o in ObservationList
-                                     orderby o ascending
-                                     select o).ToList();
+                    // get our sub-list of the observation list, and 
+                    // sort in ascending order
+                    for (int o = CurrentPhase.Observations; o > 0; o--)
+                    {
+                        successValues.Add(ObservationList[ObservationList.Count - o]);
+                    }
+
+                    successValues.Sort();
 
                     if (CurrentPhase.RankType == Constants.LessThan)
                     {
-                        if (CurrentTrial.SuccessCount < successValues[responseIndex - 1])
+                        if (CurrentTrial.SuccessCount <= successValues[responseIndex - 1])
                         {
                             MoneyValue += RewardValue;
                             RewardOn = true;
@@ -692,7 +702,7 @@ namespace ShapesExperimentWPF
                     }
                     else if (CurrentPhase.RankType == Constants.GreaterThan)
                     {
-                        if (CurrentTrial.SuccessCount > successValues[responseIndex - 1])
+                        if (CurrentTrial.SuccessCount >= successValues[responseIndex - 1])
                         {
                             MoneyValue += RewardValue;
                             RewardOn = true;
@@ -721,60 +731,66 @@ namespace ShapesExperimentWPF
                 // ////////////////////////////////////////////////////////////////
                 if (CurrentTrialCount >= CurrentPhase.Observations)
                 {
-                    if (CurrentPhase.Label == 'A')
+                    celerationVal = calculateCelerationValue();
+
+                    switch (CurrentPhase.Label)
                     {
-                        celerationVal = calculateCelerationValue();
-
-                        if (celerationVal == 1 || checkStability())
-                        {
-                            // Phase A ends! Decide on where to send them next...
-                            // Negative celeration value goes to Phase C
-                            // Positive celeration value goes to Phase B
-                            endPhase = true;
-
-                            CurrentPhase.CelerationValue = celerationVal;
-
-                            if (celerationVal < 0)
+                        case 'A':
+                            if (celerationVal == 1 || checkStability())
                             {
+                                // Phase A ends! Decide on where to send them next...
+                                // Negative celeration value goes to Phase C
+                                // Positive celeration value goes to Phase B
+                                endPhase = true;
+
+                                CurrentPhase.CelerationValue = celerationVal;
+
+                                if (celerationVal < 0)
+                                {
+                                    PhaseQueue.Enqueue(new Phase(PhaseCTemplate));
+                                }
+                                else
+                                {
+                                    PhaseQueue.Enqueue(new Phase(PhaseBTemplate));
+                                }
+                            }
+                            break;
+
+                        case 'B':
+                            if ((celerationVal < 0 && checkStability()) || checkZeroSum())
+                            {
+                                endPhase = true;
+
+                                CurrentPhase.CelerationValue = celerationVal;
+
                                 PhaseQueue.Enqueue(new Phase(PhaseCTemplate));
                             }
-                            else
+                            break;
+
+                        case 'C':
+                            if ((celerationVal > 0 && checkStability()) || checkZeroSum())
                             {
+                                endPhase = true;
+
+                                CurrentPhase.CelerationValue = celerationVal;
+
                                 PhaseQueue.Enqueue(new Phase(PhaseBTemplate));
                             }
-                        }
-                    }
-                    else if (CurrentPhase.Label == 'B')
-                    {
-                        celerationVal = calculateCelerationValue();
+                            break;
 
-                        if ((celerationVal < 0 && checkStability()) || checkZeroSum())
-                        {
-                            endPhase = true;
-
-                            CurrentPhase.CelerationValue = celerationVal;
-
-                            PhaseQueue.Enqueue(new Phase(PhaseCTemplate));
-                        }
-                    }
-                    else if (CurrentPhase.Label == 'C')
-                    {
-                        celerationVal = calculateCelerationValue();
-
-                        if ((celerationVal > 0 && checkStability()) || checkZeroSum())
-                        {
-                            endPhase = true;
-
-                            CurrentPhase.CelerationValue = celerationVal;
-
-                            PhaseQueue.Enqueue(new Phase(PhaseBTemplate));
-                        }
+                        default:
+                            break;
                     }
 
                     celerationLB.Content = celerationVal;
 
                     // Decide if we're going to end our phase
-                    if (endPhase || CurrentTrialCount >= MaxTrialValue)
+                    if (CurrentTrialCount >= MaxTrialValue)
+                    {
+                        endPhase = true;
+                    }
+
+                    if (endPhase)
                     {
                         CurrentTrialCount = 0;
                         Phases.Add(CurrentPhase);

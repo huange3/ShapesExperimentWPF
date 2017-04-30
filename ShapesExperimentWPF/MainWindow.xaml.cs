@@ -160,6 +160,7 @@ namespace ShapesExperimentWPF
                 newBoard.TotalPhasesValue = this.TotalPhasesValue;
 
                 newBoard.Show();
+
             }
             catch (Exception e)
             {
@@ -245,6 +246,17 @@ namespace ShapesExperimentWPF
             {
                 builder = null;
             }
+        }
+
+        private void MenuItemTestMode_Click(object sender, RoutedEventArgs e)
+        {
+            TestModeBoard testBoard = new TestModeBoard();
+            testBoard.Show();
+        }
+
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
