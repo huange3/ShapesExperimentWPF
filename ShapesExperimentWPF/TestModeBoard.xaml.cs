@@ -265,17 +265,6 @@ namespace ShapesExperimentWPF
                 // either greater than or less than the response index
                 // k = (m + 1)(1 - w)
 
-                // add our latest observation value so we can use it for subsequent trials
-                // but keep the list count at our main m value
-                //if (ObservationList.Count >= CurrentPhase.Observations)
-                //{
-                //    for (int i = 0; i <= (ObservationList.Count - CurrentPhase.Observations); i++)
-                //    {
-                //        ObservationList.RemoveAt(i);
-                //    }
-                //}
-
-
                 // Removing the observation list limit, just keep stacking it up!
                 ObservationList.Add(CurrentTrial.SuccessCount);
 
@@ -288,15 +277,15 @@ namespace ShapesExperimentWPF
                 }
                 else
                 {
-                    // Need to consider the scenario where we're switching from 
-                    // a phase with a low m to a phase with high m
-                    // Example: Phase B m=5 --> Phase C m=20
-
-                    responseIndex = (int)Math.Floor((CurrentPhase.Observations + 1) * (1 - CurrentPhase.Density));
+                    // Change of plans, do normal rounding for the response index. 
+                    // ex. 10.5 => 11, 2.5 => 3, 5.2 => 5
+                    responseIndex = (int)Math.Round((CurrentPhase.Observations + 1) * (1 - CurrentPhase.Density), MidpointRounding.AwayFromZero);
 
                     // get our sub-list of the observation list, and 
                     // sort in ascending order
-                    for (int o = CurrentPhase.Observations; o > 0; o--)
+                    // Note: Do NOT include the most recent timing in our calculations,
+                    // the most recent timing is the one we're testing against!
+                    for (int o = CurrentPhase.Observations + 1; o > 1; o--)
                     {
                         successValues.Add(ObservationList[ObservationList.Count - o]);
                     }
@@ -317,7 +306,7 @@ namespace ShapesExperimentWPF
 
                     if (CurrentPhase.RankType == Constants.LessThan)
                     {
-                        if (CurrentTrial.SuccessCount <= successValues[responseIndex - 1])
+                        if (CurrentTrial.SuccessCount < successValues[responseIndex - 1])
                         {
                             MoneyValue += RewardValue;
                             RewardOn = true;
@@ -327,7 +316,7 @@ namespace ShapesExperimentWPF
                     }
                     else if (CurrentPhase.RankType == Constants.GreaterThan)
                     {
-                        if (CurrentTrial.SuccessCount >= successValues[responseIndex - 1])
+                        if (CurrentTrial.SuccessCount > successValues[responseIndex - 1])
                         {
                             MoneyValue += RewardValue;
                             RewardOn = true;
@@ -367,7 +356,7 @@ namespace ShapesExperimentWPF
                 {
                     celerationVal = calculateCelerationValue();
 
-                    printLog("Celeration value=" + celerationVal);
+                    printLog("Celeration value=" + celerationVal, Brushes.ForestGreen);
 
                     switch (CurrentPhase.Label)
                     {
@@ -526,7 +515,7 @@ namespace ShapesExperimentWPF
                     }
                 }
 
-                printLog("Stability=" + isStable.ToString());
+                printLog("Stability=" + isStable.ToString(), Brushes.ForestGreen);
 
                 return isStable;
             }
@@ -641,6 +630,7 @@ namespace ShapesExperimentWPF
         private void submitBtn_Click(object sender, RoutedEventArgs e)
         {
             runTrial();
+            successCountUD.Focus();
         }
 
         public void outputTestData()

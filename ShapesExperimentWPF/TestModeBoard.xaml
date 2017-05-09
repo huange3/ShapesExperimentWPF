@@ -93,7 +93,7 @@
                 </Grid>
             </Grid>
         </GroupBox>
-        <RichTextBox x:Name="richTextBoxTestMain" Margin="345,20,10,76" VerticalScrollBarVisibility="Visible">
+        <RichTextBox x:Name="richTextBoxTestMain" Margin="345,20,10,76" VerticalScrollBarVisibility="Visible" FontFamily="Consolas">
             <FlowDocument>
                 <Paragraph>
                     <Run Text=""/>
@@ -108,8 +108,8 @@
                     <ColumnDefinition Width="358*"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="label1" Content="Success Count" Margin="0,7,0,0" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="91" Grid.ColumnSpan="2"/>
-                <Button x:Name="submitBtn" Content="Submit" HorizontalAlignment="Left" Margin="10,10,0,0" Width="75" Grid.Column="2" Click="submitBtn_Click" Height="20" VerticalAlignment="Top" IsEnabled="False"/>
-                <xctk:IntegerUpDown x:Name="successCountUD" HorizontalAlignment="Left" Margin="4,10,0,0" VerticalAlignment="Top" Minimum="0" Text="0" Width="100" TextAlignment="Center" Value="8" Height="20" Grid.Column="1"/>
+                <Button x:Name="submitBtn" Content="Submit" HorizontalAlignment="Left" Margin="10,10,0,0" Width="75" Grid.Column="2" Click="submitBtn_Click" Height="20" VerticalAlignment="Top" IsEnabled="False" IsDefault="True"/>
+                <xctk:IntegerUpDown x:Name="successCountUD" HorizontalAlignment="Left" Margin="4,10,0,0" VerticalAlignment="Top" Minimum="0" Text="0" Width="100" TextAlignment="Center" Value="8" Height="20" Grid.Column="1" Focusable="True"/>
             </Grid>
         </GroupBox>
     </Grid>
